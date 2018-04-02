@@ -17,7 +17,7 @@ Currently only uses the `en_US` dictionary loaded from the [jsdelivr.net cdn](ht
 ## Installation
 
 ```bash
-jupyter labextension install jupyterlab_spellchecker
+jupyter labextension install @ijmbarr/jupyterlab_spellchecker
 ```
 
 ## Development
