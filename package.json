@@ -1,0 +1,46 @@
+{
+  "name": "jupyterlab_spellchecker",
+  "version": "0.1.0",
+  "description": "A spell checker for jupyterlab.",
+  "keywords": [
+    "jupyter",
+    "jupyterlab",
+    "jupyterlab-extension"
+  ],
+  "homepage": "https://github.com/ijmbarr/jupyterlab_spellchecker",
+  "bugs": {
+    "url": "https://github.com/ijmbarr/jupyterlab_spellchecker"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Iain Barr",
+  "files": [
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ijmbarr/jupyterlab_spellchecker"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "@jupyterlab/application": "^0.15.0",
+    "@jupyterlab/cells": "^0.15.4",
+    "@jupyterlab/codemirror": "^0.15.4",
+    "@jupyterlab/notebook": "^0.15.7",
+    "@types/codemirror": "0.0.55",
+    "typo-js": "^1.0.3"
+  },
+  "devDependencies": {
+    "rimraf": "^2.6.1",
+    "typescript": "~2.6.0"
+  },
+  "jupyterlab": {
+    "extension": true
+  }
+}
