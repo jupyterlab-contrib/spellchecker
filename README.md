@@ -10,6 +10,9 @@ Uses [Typo.js](https://github.com/cfinke/Typo.js) under the hood for spell check
 
 Currently only uses the `en_US` dictionary loaded from the [jsdelivr.net cdn](https://www.jsdelivr.com/).
 
+## Jupterlab Version
+The current version has been tested with jupyterlab version 0.32.0. 
+
 ## Prerequisites
 
 * JupyterLab
