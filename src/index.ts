@@ -7,9 +7,11 @@ import {
     INotebookTracker
 } from '@jupyterlab/notebook';
 
+
 import {
   ICommandPalette
 } from '@jupyterlab/apputils';
+
 
 import '../style/index.css';
 
@@ -35,7 +37,7 @@ class SpellChecker {
     lang_code: string = "en_Us";
     rx_word_char: RegExp     = /[^-\[\]{}():\/!;&@$£%§<>"*+=?.,~\\^|_`#±\s\t]/;
     rx_non_word_char: RegExp =  /[-\[\]{}():\/!;&@$£%§<>"*+=?.,~\\^|_`#±\s\t]/;
-        
+
     constructor(app: JupyterLab, tracker: INotebookTracker, palette: ICommandPalette){
         this.app = app;
         this.tracker = tracker;
@@ -47,9 +49,16 @@ class SpellChecker {
 
     onActiveCellChanged(): void {
         let active_cell = this.tracker.activeCell;
+
         if ((active_cell !== null) && (active_cell.model.type == "markdown")){
-            let editor: any = active_cell.editor;
+            let editor_temp: any = active_cell.editor;
+            let editor: any = editor_temp._editor;
             let current_mode: string = editor.getOption("mode");
+
+            if (current_mode == "null"){
+                return;
+            }
+
             if (this.check_spelling){
                 editor.setOption("mode", this.define_mode(current_mode));
             }else{
@@ -82,7 +91,7 @@ class SpellChecker {
         ]).then((values) => {
             this.dictionary = new Typo(this.lang_code, values[0], values[1]);
             console.log("Dictionary Loaded ", this.lang_code);
-        }); 
+        });
     }
 
     define_mode = (original_mode_spec: string) => {
@@ -101,7 +110,7 @@ class SpellChecker {
 		            return 'spell-error';
                         }
                     }
-                    
+
                     stream.eatWhile(me.rx_non_word_char);
                     return null;
                 }
@@ -128,10 +137,10 @@ function activate(app: JupyterLab, tracker: INotebookTracker, palette: ICommandP
  * Initialization data for the jupyterlab_spellchecker extension.
  */
 const extension: JupyterLabPlugin<void> = {
-  id: 'jupyterlab_spellchecker',
-  autoStart: true,
+    id: 'jupyterlab_spellchecker',
+    autoStart: true,
     requires: [INotebookTracker, ICommandPalette],
-  activate: activate
+    activate: activate
 };
 
 export default extension;

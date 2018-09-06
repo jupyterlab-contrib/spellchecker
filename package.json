@@ -1,6 +1,6 @@
 {
   "name": "@ijmbarr/jupyterlab_spellchecker",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A spell checker for jupyterlab.",
   "keywords": [
     "jupyter",
@@ -29,16 +29,17 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.16.3",
-    "@jupyterlab/cells": "^0.16.3",
-    "@jupyterlab/codemirror": "^0.16.3",
-    "@jupyterlab/notebook": "^0.16.3",
+    "@jupyterlab/application": "^0.17.2",
+    "@jupyterlab/apputils": "^0.17.2",
+    "@jupyterlab/cells": "^0.17.2",
+    "@jupyterlab/codemirror": "^0.17.2",
+    "@jupyterlab/notebook": "^0.17.2",
     "@types/codemirror": "0.0.56",
     "typo-js": "^1.0.3"
   },
   "devDependencies": {
     "rimraf": "^2.6.1",
-    "typescript": "~2.8.3"
+    "typescript": "^2.9.2"
   },
   "jupyterlab": {
     "extension": true
