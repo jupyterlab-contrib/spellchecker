@@ -16,6 +16,7 @@ import {
 import '../style/index.css';
 
 import * as CodeMirror from 'codemirror';
+import {Cell} from "@jupyterlab/cells";
 
 declare function require(name:string): any;
 let Typo = require("typo-js");
@@ -50,12 +51,25 @@ class SpellChecker {
     onActiveCellChanged(): void {
         let active_cell = this.tracker.activeCell;
 
+        this.connectCell(active_cell);
+    }
+
+    connectCell(active_cell: Cell, retry=true): void {
         if ((active_cell !== null) && (active_cell.model.type == "markdown")){
             let editor_temp: any = active_cell.editor;
             let editor: any = editor_temp._editor;
             let current_mode: string = editor.getOption("mode");
 
             if (current_mode == "null"){
+                if (retry) {
+                    // re-try to set the spellcheck mode once, adding a new call to connectCell
+                    // at the very end of the JavaScript execution queue (using setTimeout(..., 0))
+                    // allowing the mode option to be set in the meantime
+                    setTimeout(() => {
+                        this.connectCell(active_cell, false);
+                        return true
+                    }, 0);
+                }
                 return;
             }
 
