@@ -1,5 +1,5 @@
 import {
-    JupyterLab, JupyterLabPlugin
+    JupyterFrontEnd, JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -29,7 +29,7 @@ let Typo = require("typo-js");
 class SpellChecker {
     dictionary: any;
     dict_promise: any;
-    app: JupyterLab;
+    app: JupyterFrontEnd;
     tracker: INotebookTracker;
     palette: ICommandPalette;
     editor_tracker: IEditorTracker;
@@ -46,7 +46,7 @@ class SpellChecker {
         'text/x-ipythongfm',   // IPython GFM = GitHub Flavored Markdown, applies to all .md files
     ];
 
-    constructor(app: JupyterLab, notebook_tracker: INotebookTracker, palette: ICommandPalette, editor_tracker: IEditorTracker){
+    constructor(app: JupyterFrontEnd, notebook_tracker: INotebookTracker, palette: ICommandPalette, editor_tracker: IEditorTracker){
         this.app = app;
         this.tracker = notebook_tracker;
         this.editor_tracker = editor_tracker;
@@ -156,7 +156,7 @@ class SpellChecker {
 /**
  * Activate extension
  */
-function activate(app: JupyterLab, tracker: INotebookTracker, palette: ICommandPalette, editor_tracker: IEditorTracker) {
+function activate(app: JupyterFrontEnd, tracker: INotebookTracker, palette: ICommandPalette, editor_tracker: IEditorTracker) {
     console.log('Attempting to load spellchecker');
     const sp = new SpellChecker(app, tracker, palette, editor_tracker);
     console.log("Spellchecker Loaded ", sp);
@@ -166,7 +166,7 @@ function activate(app: JupyterLab, tracker: INotebookTracker, palette: ICommandP
 /**
  * Initialization data for the jupyterlab_spellchecker extension.
  */
-const extension: JupyterLabPlugin<void> = {
+const extension: JupyterFrontEndPlugin<void> = {
     id: 'jupyterlab_spellchecker',
     autoStart: true,
     requires: [INotebookTracker, ICommandPalette, IEditorTracker],
