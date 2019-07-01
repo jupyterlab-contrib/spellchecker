@@ -2,6 +2,9 @@ import {
     JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
+import {
+    IEditorTracker
+} from '@jupyterlab/fileeditor';
 
 import {
     INotebookTracker
@@ -29,6 +32,7 @@ class SpellChecker {
     app: JupyterLab;
     tracker: INotebookTracker;
     palette: ICommandPalette;
+    editor_tracker: IEditorTracker;
 
     // Default Options
     check_spelling: boolean = true;
@@ -37,34 +41,60 @@ class SpellChecker {
     lang_code: string = "en_Us";
     rx_word_char: RegExp     = /[^-\[\]{}():\/!;&@$£%§<>"*+=?.,~\\^|_`#±\s\t]/;
     rx_non_word_char: RegExp =  /[-\[\]{}():\/!;&@$£%§<>"*+=?.,~\\^|_`#±\s\t]/;
+    accepted_types = [
+        'text/plain',
+        'text/x-ipythongfm',   // IPython GFM = GitHub Flavored Markdown, applies to all .md files
+    ];
 
-    constructor(app: JupyterLab, tracker: INotebookTracker, palette: ICommandPalette){
+    constructor(app: JupyterLab, notebook_tracker: INotebookTracker, palette: ICommandPalette, editor_tracker: IEditorTracker){
         this.app = app;
-        this.tracker = tracker;
+        this.tracker = notebook_tracker;
+        this.editor_tracker = editor_tracker;
         this.palette = palette;
         this.setup_button();
         this.load_dictionary();
         this.tracker.activeCellChanged.connect(this.onActiveCellChanged, this);
+
+        this.editor_tracker.widgetAdded.connect((sender, widget) => {
+
+            let file_editor = widget.content;
+
+            if (this.accepted_types.indexOf(file_editor.model.mimeType) !== -1) {
+                let editor = this.extract_editor(file_editor);
+                this.setup_overlay(editor);
+            }
+        });
     }
 
     onActiveCellChanged(): void {
         let active_cell = this.tracker.activeCell;
 
-        if ((active_cell !== null) && (active_cell.model.type == "markdown")){
-            let editor_temp: any = active_cell.editor;
-            let editor: any = editor_temp._editor;
-            let current_mode: string = editor.getOption("mode");
+        if ((active_cell !== null) && (active_cell.model.type == "markdown")) {
+            let editor = this.extract_editor(active_cell);
+            this.setup_overlay(editor);
+        }
+    }
 
-            if (current_mode == "null"){
-                return;
-            }
+    extract_editor(cell_or_editor: any): any {
+        let editor_temp: any = cell_or_editor.editor;
+        return editor_temp._editor;
+    }
 
-            if (this.check_spelling){
-                editor.setOption("mode", this.define_mode(current_mode));
-            }else{
-                let original_mode = (current_mode.match(/^spellcheck_/)) ? current_mode.substr(11) : current_mode
-                editor.setOption("mode", original_mode);
+    setup_overlay(editor: any, retry=true): void {
+        let current_mode: string = editor.getOption("mode");
+
+        if (current_mode == "null"){
+            if(retry) {
+                setTimeout(() => this.setup_overlay(editor, false), 0)
             }
+            return;
+        }
+
+        if (this.check_spelling){
+            editor.setOption("mode", this.define_mode(current_mode));
+        }else{
+            let original_mode = (current_mode.match(/^spellcheck_/)) ? current_mode.substr(11) : current_mode
+            editor.setOption("mode", original_mode);
         }
     }
 
@@ -126,9 +156,9 @@ class SpellChecker {
 /**
  * Activate extension
  */
-function activate(app: JupyterLab, tracker: INotebookTracker, palette: ICommandPalette) {
+function activate(app: JupyterLab, tracker: INotebookTracker, palette: ICommandPalette, editor_tracker: IEditorTracker) {
     console.log('Attempting to load spellchecker');
-    const sp = new SpellChecker(app, tracker, palette);
+    const sp = new SpellChecker(app, tracker, palette, editor_tracker);
     console.log("Spellchecker Loaded ", sp);
 };
 
@@ -139,7 +169,7 @@ function activate(app: JupyterLab, tracker: INotebookTracker, palette: ICommandP
 const extension: JupyterLabPlugin<void> = {
     id: 'jupyterlab_spellchecker',
     autoStart: true,
-    requires: [INotebookTracker, ICommandPalette],
+    requires: [INotebookTracker, ICommandPalette, IEditorTracker],
     activate: activate
 };
 
