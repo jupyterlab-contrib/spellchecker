@@ -1,21 +1,15 @@
 # jupyterlab_spellchecker
 
-A spell checker extension for markdown cells in jupyterlab notebooks. 
+A JupyterLab extension highlighting misspelled words in markdown cells within notebooks.
 
-Highlights misspelled words.
+![](demo.gif)
 
-Based entirely on [this jupyter notebook extension](https://github.com/ipython-contrib/jupyter_contrib_nbextensions/tree/master/src/jupyter_contrib_nbextensions/nbextensions/spellchecker).
+The JupyterLab extension is based on [the spellchecker Jupyter Notebook extension](https://github.com/ipython-contrib/jupyter_contrib_nbextensions/tree/master/src/jupyter_contrib_nbextensions/nbextensions/spellchecker) and relies on [Typo.js](https://github.com/cfinke/Typo.js) for the actual spell checking.
 
-Uses [Typo.js](https://github.com/cfinke/Typo.js) under the hood for spell checking. 
+The extension currently only use the `en_US` dictionary loaded from the [jsdelivr.net cdn](https://www.jsdelivr.com/).
 
-Currently only uses the `en_US` dictionary loaded from the [jsdelivr.net cdn](https://www.jsdelivr.com/).
-
-## Jupterlab Version
-The current version has been tested with jupyterlab version 0.32.0. 
-
-## Prerequisites
-
-* JupyterLab
+## JupterLab Version
+The extension has been tested up to JupyterLab version 2.0.0.
 
 ## Installation
 
@@ -25,7 +19,7 @@ jupyter labextension install @ijmbarr/jupyterlab_spellchecker
 
 ## Development
 
-For a development install (requires npm version 4 or later), do the following in the repository directory:
+For a development installation (requires npm version 4 or later), do the following in the repository directory:
 
 ```bash
 npm install
@@ -39,4 +33,3 @@ To rebuild the package and the JupyterLab app:
 npm run build
 jupyter lab build
 ```
-
