@@ -49,7 +49,7 @@ import { Cell } from "@jupyterlab/cells";
 
 const languages: ILanguage[] = [
     {code: 'en-us', name: 'English (American)', aff: en_aff, dic: en_dic},
-    {code: 'en-gb', name: 'English (United Kingdom)', aff: en_gb_aff, dic: en_gb_dic},
+    {code: 'en-gb', name: 'English (British)', aff: en_gb_aff, dic: en_gb_dic},
     {code: 'en-ca', name: 'English (Canadian)', aff: en_ca_aff, dic: en_ca_dic},
     {code: 'en-au', name: 'English (Australian)', aff: en_au_aff, dic: en_au_dic},
 ]
