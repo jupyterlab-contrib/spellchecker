@@ -3,6 +3,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
+    FileEditor,
     IEditorTracker
 } from '@jupyterlab/fileeditor';
 
@@ -10,18 +11,50 @@ import {
     INotebookTracker
 } from '@jupyterlab/notebook';
 
+import {
+    LabIcon
+} from '@jupyterlab/ui-components';
 
 import {
   ICommandPalette
 } from '@jupyterlab/apputils';
 
+import {
+  Menu
+} from '@lumino/widgets';
 
 import '../style/index.css';
 
 import * as CodeMirror from 'codemirror';
 
+import spellcheckSvg from '../style/icons/ic-baseline-spellcheck.svg';
+import { Cell } from "@jupyterlab/cells";
+
+export const spellcheckIcon = new LabIcon({
+    name: 'spellcheck:spellcheck',
+    svgstr: spellcheckSvg
+});
+
 declare function require(name:string): any;
 let Typo = require("typo-js");
+
+const CMD_TOGGLE = "spellchecker:toggle-check-spelling";
+const CMD_APPLY_SUGGESTION = "spellchecker:apply-suggestion";
+
+const TEXT_SUGGESTIONS_AVAILABLE = 'Adjust spelling to'
+const TEXT_NO_SUGGESTIONS = 'No spellcheck suggestions'
+
+interface IWord {
+    line: number;
+    start: number;
+    end: number;
+    text: string;
+}
+
+interface IContext {
+    editor: CodeMirror.Editor;
+    position: CodeMirror.Position;
+}
 
 /**
  * SpellChecker
@@ -33,6 +66,7 @@ class SpellChecker {
     tracker: INotebookTracker;
     palette: ICommandPalette;
     editor_tracker: IEditorTracker;
+    suggestions_menu: Menu;
 
     // Default Options
     check_spelling: boolean = true;
@@ -52,6 +86,7 @@ class SpellChecker {
         this.editor_tracker = editor_tracker;
         this.palette = palette;
         this.setup_button();
+        this.setup_suggestions();
         this.load_dictionary();
         this.tracker.activeCellChanged.connect(this.onActiveCellChanged, this);
 
@@ -75,13 +110,14 @@ class SpellChecker {
         }
     }
 
-    extract_editor(cell_or_editor: any): any {
-        let editor_temp: any = cell_or_editor.editor;
+    extract_editor(cell_or_editor: Cell | FileEditor): CodeMirror.Editor {
+        let editor_temp = cell_or_editor.editor;
+        // @ts-ignore
         return editor_temp._editor;
     }
 
-    setup_overlay(editor: any, retry=true): void {
-        let current_mode: string = editor.getOption("mode");
+    setup_overlay(editor: CodeMirror.Editor, retry=true): void {
+        let current_mode = editor.getOption("mode") as string;
 
         if (current_mode == "null"){
             if(retry) {
@@ -92,7 +128,7 @@ class SpellChecker {
 
         if (this.check_spelling){
             editor.setOption("mode", this.define_mode(current_mode));
-        }else{
+        } else{
             let original_mode = (current_mode.match(/^spellcheck_/)) ? current_mode.substr(11) : current_mode
             editor.setOption("mode", original_mode);
         }
@@ -104,14 +140,126 @@ class SpellChecker {
     }
 
     setup_button(){
-        const command = "spellchecker:toggle-check-spelling";
-        this.app.commands.addCommand(command,{
+        this.app.commands.addCommand(CMD_TOGGLE, {
             label: "Check Spelling",
             execute: () => {
                 this.toggle_spellcheck();
             }
         });
-        this.palette.addItem( {command, category: "Toggle Spell Checker"} );
+        this.palette.addItem( {command: CMD_TOGGLE, category: "Toggle Spell Checker"} );
+    }
+
+    get_contextmenu_context(): IContext {
+        // @ts-ignore
+        let event = this.app._contextMenuEvent as MouseEvent;
+        let target = event.target as HTMLElement;
+        let code_mirror_wrapper: any = target.closest('.CodeMirror');
+        let code_mirror = code_mirror_wrapper.CodeMirror as CodeMirror.Editor;
+        let position = code_mirror.coordsChar({
+            left: event.clientX,
+            top: event.clientY
+        }, );
+
+        return {
+            editor: code_mirror,
+            position: position
+        };
+    }
+
+    /**
+     * This is different from token as implemented in CodeMirror
+     * and needed because Markdown does not tokenize words
+     * (each letter outside of markdown features is a separate token!)
+     */
+    get_current_word(): IWord {
+        let { editor, position } = this.get_contextmenu_context();
+        let line = editor.getDoc().getLine(position.line);
+        let start = position.ch;
+        while (start > 0 && line[start].match(this.rx_word_char)) {
+            start--;
+        }
+        let end = position.ch;
+        while (end < line.length && line[end].match(this.rx_word_char)) {
+            end++;
+        }
+        return {
+            line: position.line,
+            start: start,
+            end: end,
+            text: line.substring(start, end)
+        }
+    }
+
+    setup_suggestions() {
+        this.suggestions_menu = new Menu({commands: this.app.commands});
+        this.suggestions_menu.title.label = TEXT_SUGGESTIONS_AVAILABLE;
+        this.suggestions_menu.title.icon = spellcheckIcon.bindprops({ stylesheet: 'menuItem' });
+        let CMD_UPDATE_SUGGESTIONS = 'spellchecker:update-suggestions';
+
+        // this command is not meant to be show - it is just menu trigger detection hack
+        this.app.commands.addCommand(CMD_UPDATE_SUGGESTIONS, {
+            execute: args => {},
+            isVisible: (args) => {
+                this.prepare_suggestions();
+                return false;
+            }
+        });
+        this.app.contextMenu.addItem({
+            selector: '.cm-spell-error',
+            command: CMD_UPDATE_SUGGESTIONS
+        });
+        // end of the menu trigger detection hack
+
+        this.app.contextMenu.addItem({
+            selector: '.cm-spell-error',
+            submenu: this.suggestions_menu,
+            type: 'submenu'
+        });
+        this.app.commands.addCommand(CMD_APPLY_SUGGESTION, {
+            execute: args => {
+                this.apply_suggestion(args['name'] as string);
+            },
+            label: args => args['name'] as string
+        });
+    }
+
+    prepare_suggestions() {
+        let word = this.get_current_word();
+        let suggestions: string[] = this.dictionary.suggest(word.text);
+        this.suggestions_menu.clearItems();
+
+        if (suggestions.length) {
+            for (let suggestion of suggestions) {
+                this.suggestions_menu.addItem({
+                    command: CMD_APPLY_SUGGESTION,
+                    args: { name: suggestion }
+                });
+            }
+            this.suggestions_menu.title.label = TEXT_SUGGESTIONS_AVAILABLE;
+            this.suggestions_menu.title.className = ''
+            this.suggestions_menu.setHidden(false)
+        } else {
+            this.suggestions_menu.title.className = 'lm-mod-disabled'
+            this.suggestions_menu.title.label = TEXT_NO_SUGGESTIONS;
+            this.suggestions_menu.setHidden(true)
+        }
+    }
+
+    apply_suggestion(replacement: string) {
+        let { editor } = this.get_contextmenu_context();
+        let word = this.get_current_word();
+
+        editor.getDoc().replaceRange(
+          replacement,
+          {
+              ch: word.start,
+              line: word.line
+          },
+          {
+              ch: word.end,
+              line: word.line
+          }
+        )
     }
 
     load_dictionary(){
@@ -134,13 +282,12 @@ class SpellChecker {
             var spellchecker_overlay = {
                 name: new_mode_spec,
                 token: function (stream:any, state:any) {
-                    if (stream.eatWhile(me.rx_word_char)){
-		        var word = stream.current().replace(/(^')|('$)/g, '');
-		        if (!word.match(/^\d+$/) && (me.dictionary !== undefined) && !me.dictionary.check(word)) {
-		            return 'spell-error';
+                    if (stream.eatWhile(me.rx_word_char)) {
+                        var word = stream.current().replace(/(^')|('$)/g, '');
+                        if (!word.match(/^\d+$/) && (me.dictionary !== undefined) && !me.dictionary.check(word)) {
+                            return 'spell-error';
                         }
                     }
-
                     stream.eatWhile(me.rx_non_word_char);
                     return null;
                 }

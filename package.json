@@ -35,6 +35,8 @@
     "@jupyterlab/codemirror": "^2.0.0",
     "@jupyterlab/fileeditor": "^2.0.0",
     "@jupyterlab/notebook": "^2.0.0",
+    "@jupyterlab/ui-components": "^2.2.0",
+    "@lumino/widgets": "^1.13.3",
     "@types/codemirror": "0.0.87",
     "typo-js": "^1.0.3"
   },
