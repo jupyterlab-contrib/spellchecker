@@ -9,7 +9,7 @@ The JupyterLab extension is based on [the spellchecker Jupyter Notebook extensio
 The extension currently only use the `en_US` dictionary loaded from the [jsdelivr.net cdn](https://www.jsdelivr.com/).
 
 ## JupterLab Version
-The extension has been tested up to JupyterLab version 2.0.0.
+The extension has been tested up to JupyterLab version 2.2.0.
 
 ## Installation
 
