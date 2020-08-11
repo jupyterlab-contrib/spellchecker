@@ -26,6 +26,7 @@ import {
 import '../style/index.css';
 
 import * as CodeMirror from 'codemirror';
+
 import { IStatusBar, TextItem } from "@jupyterlab/statusbar";
 
 import spellcheckSvg from '../style/icons/ic-baseline-spellcheck.svg';
@@ -104,12 +105,7 @@ class StatusWidget extends ReactWidget {
  */
 class SpellChecker {
     dictionary: any;
-    app: JupyterFrontEnd;
-    tracker: INotebookTracker;
-    palette: ICommandPalette;
-    editor_tracker: IEditorTracker;
     suggestions_menu: Menu;
-    status_bar: IStatusBar;
     status_widget: StatusWidget;
 
     // Default Options
@@ -123,15 +119,10 @@ class SpellChecker {
     ];
 
     constructor(
-      app: JupyterFrontEnd, notebook_tracker: INotebookTracker, palette: ICommandPalette,
-      editor_tracker: IEditorTracker, status_bar: IStatusBar
+      public app: JupyterFrontEnd, public tracker: INotebookTracker, public palette: ICommandPalette,
+      public editor_tracker: IEditorTracker, public status_bar: IStatusBar
     ){
         this.language = languages[0];
-        this.app = app;
-        this.tracker = notebook_tracker;
-        this.editor_tracker = editor_tracker;
-        this.palette = palette;
-        this.status_bar = status_bar;
         this.setup_button();
         this.setup_suggestions();
         this.setup_language_picker();
@@ -193,11 +184,14 @@ class SpellChecker {
         this.palette.addItem( {command: CMD_TOGGLE, category: "Toggle Spell Checker"} );
     }
 
-    get_contextmenu_context(): IContext {
+    get_contextmenu_context(): IContext | null {
         // @ts-ignore
         let event = this.app._contextMenuEvent as MouseEvent;
         let target = event.target as HTMLElement;
         let code_mirror_wrapper: any = target.closest('.CodeMirror');
+        if (code_mirror_wrapper === null) {
+            return null;
+        }
         let code_mirror = code_mirror_wrapper.CodeMirror as CodeMirror.Editor;
         let position = code_mirror.coordsChar({
             left: event.clientX,
@@ -215,8 +209,8 @@ class SpellChecker {
      * and needed because Markdown does not tokenize words
      * (each letter outside of markdown features is a separate token!)
      */
-    get_current_word(): IWord {
-        let { editor, position } = this.get_contextmenu_context();
+    get_current_word(context: IContext): IWord {
+        let { editor, position } = context;
         let line = editor.getDoc().getLine(position.line);
         let start = position.ch;
         while (start > 0 && line[start].match(this.rx_word_char)) {
@@ -268,8 +262,16 @@ class SpellChecker {
     }
 
     prepare_suggestions() {
-        let word = this.get_current_word();
-        let suggestions: string[] = this.dictionary.suggest(word.text);
+        let context = this.get_contextmenu_context();
+        let suggestions: string[]
+        if (context === null) {
+            // no context (e.g. the edit was applied and the token is no longer in DOM,
+            // so we cannot find the parent editor
+            suggestions = [];
+        } else {
+            let word = this.get_current_word(context);
+            suggestions = this.dictionary.suggest(word.text);
+        }
         this.suggestions_menu.clearItems();
 
         if (suggestions.length) {
@@ -290,10 +292,14 @@ class SpellChecker {
     }
 
     apply_suggestion(replacement: string) {
-        let { editor } = this.get_contextmenu_context();
-        let word = this.get_current_word();
+        let context = this.get_contextmenu_context();
+        if (context === null) {
+            console.warn('Applying suggestion failed (probably was already applied earlier)')
+            return;
+        }
+        let word = this.get_current_word(context);
 
-        editor.getDoc().replaceRange(
+        context.editor.getDoc().replaceRange(
           replacement,
           {
               ch: word.start,
@@ -393,7 +399,7 @@ function activate(app: JupyterFrontEnd, tracker: INotebookTracker, palette: ICom
     console.log('Attempting to load spellchecker');
     const sp = new SpellChecker(app, tracker, palette, editor_tracker, status_bar);
     console.log("Spellchecker Loaded ", sp);
-};
+}
 
 
 /**
