@@ -1,0 +1,24 @@
+{
+  "jupyter.lab.setting-icon": "spellcheck:spellcheck",
+  "jupyter.lab.setting-icon-label": "Spellchecker",
+  "title": "Spellchecker",
+  "description": "Spellchecker settings.",
+  "definitions": {
+    "ignore": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "properties": {
+    "ignore": {
+      "title": "Words to be ignored by the spellchecker",
+      "description": "Case-sensitive list of words to be ignored",
+      "$ref": "#/definitions/ignore",
+      "default": ["JupyterLab", "Jupyter"]
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}
