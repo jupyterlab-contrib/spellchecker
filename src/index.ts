@@ -146,6 +146,7 @@ class SpellChecker {
         }
         if (setup_signal) {
             file_editor.model.mimeTypeChanged.connect((model, args) => {
+                // putting at the end of execution queue to allow the CodeMirror mode to be updated
                 setTimeout(() => this.setup_file_editor(file_editor), 0)
             })
         }
@@ -168,7 +169,8 @@ class SpellChecker {
         let current_mode = editor.getOption("mode") as string;
 
         if (current_mode == "null"){
-            if(retry) {
+            if (retry) {
+                // putting at the end of execution queue to allow the CodeMirror mode to be updated
                 setTimeout(() => this.setup_overlay(editor, false), 0)
             }
             return;
