@@ -98,10 +98,7 @@ class SpellChecker {
     rx_non_word_char: RegExp =  /[-\[\]{}():\/!;&@$£%§<>"*+=?.,~\\^|_`#±\s\t]/;
     ignored_tokens: Set<string> = new Set();
     settings: ISettingRegistry.ISettings;
-    accepted_types = [
-        'text/plain',
-        'text/x-ipythongfm',   // IPython GFM = GitHub Flavored Markdown, applies to all .md files
-    ];
+    accepted_types: string[]
 
     constructor(
       public app: JupyterFrontEnd, public tracker: INotebookTracker, public palette: ICommandPalette,
@@ -113,7 +110,10 @@ class SpellChecker {
         this.setup_language_picker();
         this.load_dictionary().catch(console.warn);
         this.tracker.activeCellChanged.connect(() => this.setup_cell_editor(this.tracker.activeCell));
-        this.editor_tracker.widgetAdded.connect((sender, widget) => this.setup_file_editor(widget.content));
+        // setup newly open editors
+        this.editor_tracker.widgetAdded.connect((sender, widget) => this.setup_file_editor(widget.content, true));
+        // refresh already open editors when activated (because the MIME type might have changed)
+        this.editor_tracker.currentChanged.connect((sender, widget) => this.setup_file_editor(widget.content, false));
         this.setup_settings()
         this.setup_ignore_action()
     }
@@ -135,13 +135,20 @@ class SpellChecker {
         this.settings = settings;
         let tokens = settings.get('ignore').composite as Array<string>;
         this.ignored_tokens = new Set(tokens)
+        this.accepted_types = settings.get('mimeTypes').composite as Array<string>;
         this.refresh_state()
     }
 
-    setup_file_editor(file_editor: FileEditor): void {
-        if (this.accepted_types.indexOf(file_editor.model.mimeType) !== -1) {
+    setup_file_editor(file_editor: FileEditor, setup_signal=false): void {
+        if (this.accepted_types && this.accepted_types.indexOf(file_editor.model.mimeType) !== -1) {
             let editor = this.extract_editor(file_editor);
             this.setup_overlay(editor);
+        }
+        if (setup_signal) {
+            file_editor.model.mimeTypeChanged.connect((model, args) => {
+                // putting at the end of execution queue to allow the CodeMirror mode to be updated
+                setTimeout(() => this.setup_file_editor(file_editor), 0)
+            })
         }
     }
 
@@ -162,7 +169,8 @@ class SpellChecker {
         let current_mode = editor.getOption("mode") as string;
 
         if (current_mode == "null"){
-            if(retry) {
+            if (retry) {
+                // putting at the end of execution queue to allow the CodeMirror mode to be updated
                 setTimeout(() => this.setup_overlay(editor, false), 0)
             }
             return;

@@ -9,6 +9,12 @@
       "items": {
         "type": "string"
       }
+    },
+    "mimeTypes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "properties": {
@@ -17,6 +23,15 @@
       "description": "Case-sensitive list of words to be ignored",
       "$ref": "#/definitions/ignore",
       "default": ["JupyterLab", "Jupyter"]
+    },
+    "mimeTypes": {
+      "title": "MIME types for files/editors for which the spellchecking should be activated",
+      "description": "List of MIME types. GFM denotes GitHub Flavored Markdown",
+      "$ref": "#/definitions/mimeTypes",
+      "default": [
+        "text/plain",
+        "text/x-ipythongfm"
+      ]
     }
   },
   "additionalProperties": false,
