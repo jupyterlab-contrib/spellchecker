@@ -9,12 +9,13 @@ The JupyterLab extension is based on [the spellchecker Jupyter Notebook extensio
 The extension provides (Hunspell) [SCOWL](http://wordlist.aspell.net/) dictionaries for American, British, Canadian, and Australian English.
 
 ## JupyterLab Version
+
 The extension has been tested up to JupyterLab version 2.2.0.
 
 ## Installation
 
 ```bash
-jupyter labextension install @ijmbarr/jupyterlab_spellchecker
+jupyter labextension install @dmenezesgabriel/jupyterlab_spellchecker
 ```
 
 ## Development
