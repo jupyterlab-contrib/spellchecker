@@ -14,7 +14,7 @@ The extension has been tested up to JupyterLab version 2.2.0.
 ## Installation
 
 ```bash
-jupyter labextension install @ijmbarr/jupyterlab_spellchecker
+jupyter labextension install @ocordes/jupyterlab_spellchecker
 ```
 
 ## Development

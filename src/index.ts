@@ -484,7 +484,7 @@ function activate(app: JupyterFrontEnd, tracker: INotebookTracker, palette: ICom
  * Initialization data for the jupyterlab_spellchecker extension.
  */
 const extension: JupyterFrontEndPlugin<void> = {
-    id: '@ijmbarr/jupyterlab_spellchecker:plugin',
+    id: '@ocordes/jupyterlab_spellchecker:plugin',
     autoStart: true,
     requires: [INotebookTracker, ICommandPalette, IEditorTracker, IStatusBar, ISettingRegistry],
     activate: activate

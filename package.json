@@ -1,6 +1,6 @@
 {
   "name": "@ocordes/jupyterlab_spellchecker",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "A spell checker for jupyterlab.",
   "keywords": [
     "jupyter",
@@ -51,7 +51,4 @@
     "extension": true,
     "schemaDir": "schema"
   },
-  "directories": {
-    "lib": "lib"
-  }
 }
