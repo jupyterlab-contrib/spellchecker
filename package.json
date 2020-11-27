@@ -1,5 +1,5 @@
 {
-  "name": "@ijmbarr/jupyterlab_spellchecker",
+  "name": "@ocordes/jupyterlab_spellchecker",
   "version": "0.1.10",
   "description": "A spell checker for jupyterlab.",
   "keywords": [
@@ -7,12 +7,12 @@
     "jupyterlab",
     "jupyterlab-extension"
   ],
-  "homepage": "https://github.com/ijmbarr/jupyterlab_spellchecker",
+  "homepage": "https://github.com/ocordes/jupyterlab_spellchecker",
   "bugs": {
-    "url": "https://github.com/ijmbarr/jupyterlab_spellchecker"
+    "url": "https://github.com/ocordes/jupyterlab_spellchecker"
   },
   "license": "BSD-3-Clause",
-  "author": "Iain Barr",
+  "author": "Iain Barr + Oliver Cordes",
   "files": [
     "dictionaries/*{aff,dic}",
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
@@ -23,7 +23,7 @@
   "types": "lib/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ijmbarr/jupyterlab_spellchecker"
+    "url": "git+https://github.com/ocordes/jupyterlab_spellchecker.git"
   },
   "scripts": {
     "build": "tsc",
@@ -50,5 +50,8 @@
   "jupyterlab": {
     "extension": true,
     "schemaDir": "schema"
+  },
+  "directories": {
+    "lib": "lib"
   }
 }
