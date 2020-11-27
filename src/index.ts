@@ -61,12 +61,16 @@ import en_ca_dic from 'file-loader!../dictionaries/en_CA.dic';
 import en_au_aff from 'file-loader!../dictionaries/en_AU.aff';
 import en_au_dic from 'file-loader!../dictionaries/en_AU.dic';
 
+import de_de_aff from 'file-loader!../dictionaries/de_DE.aff';
+import de_de_dic from 'file-loader!../dictionaries/de_DE.dic';
+
 
 const languages: ILanguage[] = [
     {code: 'en-us', name: 'English (American)', aff: en_aff, dic: en_dic},
     {code: 'en-gb', name: 'English (British)', aff: en_gb_aff, dic: en_gb_dic},
     {code: 'en-ca', name: 'English (Canadian)', aff: en_ca_aff, dic: en_ca_dic},
     {code: 'en-au', name: 'English (Australian)', aff: en_au_aff, dic: en_au_dic},
+    {code: 'de-de', name: 'Deutsch (Deutschland)', aff: de_de_aff, dic: de_de_dic},
 ]
 
 class StatusWidget extends ReactWidget {
@@ -104,27 +108,40 @@ class SpellChecker {
       public app: JupyterFrontEnd, public tracker: INotebookTracker, public palette: ICommandPalette,
       public editor_tracker: IEditorTracker, public status_bar: IStatusBar, public setting_registry: ISettingRegistry
     ){
-        this.language = languages[0];
+        // have at least a default
+        this.language = languages[0]
+
+        // read the settings
+        this.setup_settings();
+
+        // setup the static content of the spellchecker UI
         this.setup_button();
         this.setup_suggestions();
         this.setup_language_picker();
-        this.load_dictionary().catch(console.warn);
+        this.setup_ignore_action()
+
         this.tracker.activeCellChanged.connect(() => this.setup_cell_editor(this.tracker.activeCell));
         // setup newly open editors
         this.editor_tracker.widgetAdded.connect((sender, widget) => this.setup_file_editor(widget.content, true));
         // refresh already open editors when activated (because the MIME type might have changed)
         this.editor_tracker.currentChanged.connect((sender, widget) => this.setup_file_editor(widget.content, false));
-        this.setup_settings()
-        this.setup_ignore_action()
     }
 
+    // move the load_dictionary into the setup routine, because then
+    // we know that the values are set correctly!
     setup_settings() {
         Promise.all([this.setting_registry.load(extension.id), this.app.restored])
           .then(([settings]) => {
               this.update_settings(settings);
               settings.changed.connect(() => {
                   this.update_settings(settings);
+
+                  // load the dictionary
+                  this.load_dictionary().catch(console.warn);
               });
+
+              // load the dictionary
+              this.load_dictionary().catch(console.warn);
           })
           .catch((reason: Error) => {
               console.error(reason.message);
@@ -134,8 +151,20 @@ class SpellChecker {
     update_settings(settings: ISettingRegistry.ISettings) {
         this.settings = settings;
         let tokens = settings.get('ignore').composite as Array<string>;
-        this.ignored_tokens = new Set(tokens)
+        this.ignored_tokens = new Set(tokens);
         this.accepted_types = settings.get('mimeTypes').composite as Array<string>;
+
+        // read the saved language setting
+        let language_code = settings.get('language').composite;
+        let user_language = languages.filter(l => l.code == language_code)[0];
+        if (user_language === undefined)
+        {
+          console.warn('The language '+language_code+' is not supportet!')
+        }
+        else
+        {
+          this.language = user_language;
+        }
         this.refresh_state()
     }
 
@@ -359,6 +388,10 @@ class SpellChecker {
         ]).then((values) => {
             this.dictionary = new Typo(this.language.name, values[0], values[1]);
             console.log("Dictionary Loaded ", this.language.name, this.language.code);
+
+            // update the complete UI
+            this.status_widget.update();
+            this.refresh_state()
         });
     }
 
@@ -408,11 +441,14 @@ class SpellChecker {
             title: 'Choose spellchecker language',
             items: choices.map(language => language.name)
         }).then(value => {
-            if (value != null) {
+            if (value.value != null) {
                 this.language = languages.filter(l => l.name == value.value)[0];
                 this.load_dictionary().then(() => {
-                    this.status_widget.update();
-                    this.refresh_state()
+                    // save the choosen language in the settings
+                    this.settings.set(
+                      'language',
+                      this.language.code
+                    );
                 });
             }
         });

@@ -4,6 +4,9 @@
   "title": "Spellchecker",
   "description": "Spellchecker settings.",
   "definitions": {
+    "language": {
+      "type": "string"
+    },
     "ignore": {
       "type": "array",
       "items": {
@@ -18,6 +21,12 @@
     }
   },
   "properties": {
+    "language": {
+      "title": "Language of the spellchecker",
+      "description": "Language code, e.g. en-us",
+      "$ref": "#/definitions/language",
+      "default": "en-us"
+    },
     "ignore": {
       "title": "Words to be ignored by the spellchecker",
       "description": "Case-sensitive list of words to be ignored",
