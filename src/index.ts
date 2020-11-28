@@ -159,7 +159,7 @@ class SpellChecker {
         let user_language = languages.filter(l => l.code == language_code)[0];
         if (user_language === undefined)
         {
-          console.warn('The language '+language_code+' is not supportet!')
+          console.warn('The language ' + language_code + ' is not supported!')
         }
         else
         {
