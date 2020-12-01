@@ -135,13 +135,7 @@ class SpellChecker {
               this.update_settings(settings);
               settings.changed.connect(() => {
                   this.update_settings(settings);
-
-                  // load the dictionary
-                  this.load_dictionary().catch(console.warn);
               });
-
-              // load the dictionary
-              this.load_dictionary().catch(console.warn);
           })
           .catch((reason: Error) => {
               console.error(reason.message);
@@ -164,6 +158,8 @@ class SpellChecker {
         else
         {
           this.language = user_language;
+          // load the dictionary
+          this.load_dictionary().catch(console.warn);
         }
         this.refresh_state()
     }
