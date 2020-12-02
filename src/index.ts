@@ -19,7 +19,7 @@ export const spellcheckIcon = new LabIcon({
 });
 
 declare function require(name:string): any;
-let Typo = require("typo-js");
+let Typo = require("@ocordes/typo-js");
 
 const CMD_APPLY_SUGGESTION = 'spellchecker:apply-suggestion';
 const CMD_IGNORE_WORD = 'spellchecker:ignore'
@@ -61,8 +61,26 @@ import en_ca_dic from 'file-loader!../dictionaries/en_CA.dic';
 import en_au_aff from 'file-loader!../dictionaries/en_AU.aff';
 import en_au_dic from 'file-loader!../dictionaries/en_AU.dic';
 
-import de_de_aff from 'file-loader!../dictionaries/de_DE.aff';
-import de_de_dic from 'file-loader!../dictionaries/de_DE.dic';
+import de_de_aff from 'file-loader!../dictionaries/de_DE_frami.aff';
+import de_de_dic from 'file-loader!../dictionaries/de_DE_frami.dic';
+
+import de_at_aff from 'file-loader!../dictionaries/de_AT_frami.aff';
+import de_at_dic from 'file-loader!../dictionaries/de_AT_frami.dic';
+
+import de_ch_aff from 'file-loader!../dictionaries/de_CH_frami.aff';
+import de_ch_dic from 'file-loader!../dictionaries/de_CH_frami.dic';
+
+import fr_fr_aff from 'file-loader!../dictionaries/fr.aff';
+import fr_fr_dic from 'file-loader!../dictionaries/fr.dic';
+
+import es_es_aff from 'file-loader!../dictionaries/es_ES.aff';
+import es_es_dic from 'file-loader!../dictionaries/es_ES.dic';
+
+//import it_it_aff from 'file-loader!../dictionaries/it_IT.aff';
+//import it_it_dic from 'file-loader!../dictionaries/it_IT.dic';
+
+import pt_pt_aff from 'file-loader!../dictionaries/pt_PT.aff';
+import pt_pt_dic from 'file-loader!../dictionaries/pt_PT.dic';
 
 
 const languages: ILanguage[] = [
@@ -71,6 +89,12 @@ const languages: ILanguage[] = [
     {code: 'en-ca', name: 'English (Canadian)', aff: en_ca_aff, dic: en_ca_dic},
     {code: 'en-au', name: 'English (Australian)', aff: en_au_aff, dic: en_au_dic},
     {code: 'de-de', name: 'Deutsch (Deutschland)', aff: de_de_aff, dic: de_de_dic},
+    {code: 'de-at', name: 'Deutsch (Österreich)', aff: de_at_aff, dic: de_at_dic},
+    {code: 'de-ch', name: 'Deutsch (Schweiz)', aff: de_ch_aff, dic: de_ch_dic},
+    {code: 'fr-fr', name: 'Français (France)', aff: fr_fr_aff, dic: fr_fr_dic},
+    {code: 'es-es', name: 'Español (España)', aff: es_es_aff, dic: es_es_dic},
+    //{code: 'it-it', name: 'Italiano (Italia)', aff: it_it_aff, dic: it_it_dic},
+    {code: 'pt-pt', name: 'Português (Portugal)', aff: pt_pt_aff, dic: pt_pt_dic},
 ]
 
 class StatusWidget extends ReactWidget {

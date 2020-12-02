@@ -1,6 +1,6 @@
 {
   "name": "@ocordes/jupyterlab_spellchecker",
-  "version": "0.1.12",
+  "version": "0.2.0",
   "description": "A spell checker for jupyterlab.",
   "keywords": [
     "jupyter",
@@ -12,7 +12,10 @@
     "url": "https://github.com/ocordes/jupyterlab_spellchecker"
   },
   "license": "BSD-3-Clause",
-  "author": "Iain Barr + Oliver Cordes",
+  "contributors": [
+      "Iain Barr",
+      "Oliver Cordes <ocordes@astro.uni-bonn.de> (https://astro.uni-bonn.de/~ocordes)"
+    ],
   "files": [
     "dictionaries/*{aff,dic}",
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
@@ -37,11 +40,11 @@
     "@jupyterlab/codemirror": "^2.2.1",
     "@jupyterlab/fileeditor": "^2.2.1",
     "@jupyterlab/notebook": "^2.2.2",
-    "@jupyterlab/ui-components": "^2.2.1",
     "@jupyterlab/statusbar": "^2.2.0",
+    "@jupyterlab/ui-components": "^2.2.1",
     "@lumino/widgets": "^1.13.3",
-    "@types/codemirror": "0.0.87",
-    "typo-js": "^1.0.3"
+    "@ocordes/typo-js": "^1.1.0-2",
+    "@types/codemirror": "0.0.87"
   },
   "devDependencies": {
     "rimraf": "^2.6.1",
