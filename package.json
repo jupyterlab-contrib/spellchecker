@@ -13,9 +13,9 @@
   },
   "license": "BSD-3-Clause",
   "contributors": [
-      "Iain Barr",
-      "Oliver Cordes <ocordes@astro.uni-bonn.de> (https://astro.uni-bonn.de/~ocordes)"
-    ],
+    "Iain Barr",
+    "Oliver Cordes <ocordes@astro.uni-bonn.de> (https://astro.uni-bonn.de/~ocordes)"
+  ],
   "files": [
     "dictionaries/*{aff,dic}",
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
