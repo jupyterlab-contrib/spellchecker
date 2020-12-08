@@ -19,7 +19,7 @@ export const spellcheckIcon = new LabIcon({
 });
 
 declare function require(name:string): any;
-let Typo = require("@ocordes/typo-js");
+let Typo = require("typo-js");
 
 const CMD_APPLY_SUGGESTION = 'spellchecker:apply-suggestion';
 const CMD_IGNORE_WORD = 'spellchecker:ignore'
@@ -504,7 +504,7 @@ function activate(app: JupyterFrontEnd, tracker: INotebookTracker, palette: ICom
  * Initialization data for the jupyterlab_spellchecker extension.
  */
 const extension: JupyterFrontEndPlugin<void> = {
-    id: '@ocordes/jupyterlab_spellchecker:plugin',
+    id: '@ijmbarr/jupyterlab_spellchecker:plugin',
     autoStart: true,
     requires: [INotebookTracker, ICommandPalette, IEditorTracker, IStatusBar, ISettingRegistry],
     activate: activate
