@@ -1,3 +1,7 @@
 .CodeMirror .cm-spell-error:not(.cm-url):not(.cm-tag):not(.cm-word) {
-	 background: rgba(255, 0, 0, .15);
+  background: rgba(255, 0, 0, .15);
+}
+
+body[data-jp-theme-light='false'] .CodeMirror .cm-spell-error:not(.cm-url):not(.cm-tag):not(.cm-word) {
+  background: rgba(255, 0, 0, .35);
 }
