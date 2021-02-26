@@ -14,9 +14,9 @@ import { Menu } from '@lumino/widgets';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
 import { Cell } from '@jupyterlab/cells';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { CodeMirrorEditor, ICodeMirror } from '@jupyterlab/codemirror';
 
-import * as CodeMirror from 'codemirror';
+import CodeMirror from 'codemirror';
 
 import '../style/index.css';
 import spellcheckSvg from '../style/icons/ic-baseline-spellcheck.svg';
@@ -161,12 +161,13 @@ class SpellChecker {
   accepted_types: string[];
 
   constructor(
-    public app: JupyterFrontEnd,
-    public tracker: INotebookTracker,
-    public editor_tracker: IEditorTracker,
-    public setting_registry: ISettingRegistry,
-    public palette?: ICommandPalette,
-    public status_bar?: IStatusBar
+    protected app: JupyterFrontEnd,
+    protected tracker: INotebookTracker,
+    protected editor_tracker: IEditorTracker,
+    protected setting_registry: ISettingRegistry,
+    protected code_mirror: ICodeMirror,
+    protected palette?: ICommandPalette,
+    protected status_bar?: IStatusBar
   ) {
     // have at least a default
     this.language = languages[0];
@@ -485,7 +486,7 @@ class SpellChecker {
       return original_mode_spec;
     }
     const new_mode_spec = 'spellcheck_' + original_mode_spec;
-    CodeMirror.defineMode(new_mode_spec, (config: any) => {
+    this.code_mirror.CodeMirror.defineMode(new_mode_spec, (config: any) => {
       const spellchecker_overlay = {
         name: new_mode_spec,
         token: (stream: any, state: any) => {
@@ -504,8 +505,8 @@ class SpellChecker {
           return null;
         }
       };
-      return CodeMirror.overlayMode(
-        CodeMirror.getMode(config, original_mode_spec),
+      return this.code_mirror.CodeMirror.overlayMode(
+        this.code_mirror.CodeMirror.getMode(config, original_mode_spec),
         spellchecker_overlay,
         true
       );
@@ -580,6 +581,7 @@ function activate(
   tracker: INotebookTracker,
   editor_tracker: IEditorTracker,
   setting_registry: ISettingRegistry,
+  code_mirror: ICodeMirror,
   palette: ICommandPalette,
   status_bar: IStatusBar
 ): void {
@@ -589,6 +591,7 @@ function activate(
     tracker,
     editor_tracker,
     setting_registry,
+    code_mirror,
     palette,
     status_bar
   );
@@ -601,7 +604,7 @@ function activate(
 const extension: JupyterFrontEndPlugin<void> = {
   id: '@ijmbarr/jupyterlab_spellchecker:plugin',
   autoStart: true,
-  requires: [INotebookTracker, IEditorTracker, ISettingRegistry],
+  requires: [INotebookTracker, IEditorTracker, ISettingRegistry, ICodeMirror],
   optional: [ICommandPalette, IStatusBar],
   activate: activate
 };
