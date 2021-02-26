@@ -578,9 +578,9 @@ class SpellChecker {
 function activate(
   app: JupyterFrontEnd,
   tracker: INotebookTracker,
-  palette: ICommandPalette,
   editor_tracker: IEditorTracker,
   setting_registry: ISettingRegistry,
+  palette: ICommandPalette,
   status_bar: IStatusBar
 ): void {
   console.log('Attempting to load spellchecker');
