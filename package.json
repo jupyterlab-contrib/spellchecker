@@ -1,7 +1,7 @@
 {
   "name": "@jupyterlab-contrib/jupyterlab_spellchecker",
   "version": "0.3.0",
-  "description": "A spell checker for jupyterlab.",
+  "description": "A spell checker for JupyterLab.",
   "keywords": [
     "jupyter",
     "jupyterlab",
@@ -9,7 +9,7 @@
   ],
   "homepage": "https://github.com/jupyterlab-contrib/jupyterlab_spellchecker",
   "bugs": {
-    "url": "https://github.com/jupyterlab-contrib/jupyterlab_spellchecker"
+    "url": "https://github.com/jupyterlab-contrib/jupyterlab_spellchecker/issues"
   },
   "license": "BSD-3-Clause",
   "contributors": [
@@ -31,11 +31,22 @@
     "url": "git+https://github.com/jupyterlab-contrib/jupyterlab_spellchecker.git"
   },
   "scripts": {
-    "build": "tsc",
-    "clean": "rimraf lib",
-    "watch": "tsc -w",
+    "build": "jlpm run build:lib && jlpm run build:labextension:dev",
+    "build:prod": "jlpm run build:lib && jlpm run build:labextension",
+    "build:labextension": "jupyter labextension build .",
+    "build:labextension:dev": "jupyter labextension build --development True .",
+    "build:lib": "tsc",
+    "clean": "jlpm run clean:lib",
+    "clean:lib": "rimraf lib tsconfig.tsbuildinfo",
+    "clean:labextension": "rimraf {{ cookiecutter.python_name }}/labextension",
+    "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
     "eslint": "eslint . --ext .ts,.tsx --fix",
-    "eslint:check": "eslint . --ext .ts,.tsx"
+    "eslint:check": "eslint . --ext .ts,.tsx",
+    "install:extension": "jupyter labextension develop --overwrite .",
+    "prepare": "jlpm run clean && jlpm run build:prod",
+    "watch": "run-p watch:src watch:labextension",
+    "watch:src": "tsc -w",
+    "watch:labextension": "jupyter labextension watch ."
   },
   "dependencies": {
     "@jupyterlab/application": "^3.0.3",

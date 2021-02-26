@@ -1,12 +1,17 @@
 {
   "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "composite": true,
     "declaration": true,
     "esModuleInterop": true,
+    "incremental": true,
     "noImplicitAny": true,
     "noEmitOnError": true,
     "noUnusedLocals": true,
     "module": "commonjs",
     "moduleResolution": "node",
+    "strict": true,
+    "strictPropertyInitialization": false,
     "target": "ES6",
     "outDir": "./lib",
     "lib": ["ES5", "ES6", "ES2015.Promise", "DOM"],
