@@ -18,9 +18,23 @@
       "items": {
         "type": "string"
       }
+    },
+    "theme": {
+      "type": "string",
+      "enum": [
+        "background-box",
+        "wavy-underline",
+        "dotted-underline"
+      ]
     }
   },
   "properties": {
+    "theme": {
+      "title": "Theme",
+      "description": "Theme for decorating misspelt words, one of:\n  - 'background-box': fills the background of the misspelt word;\n  - 'wavy-underline': underline with wavelets (note: Chrome has a bug which prevents rendering of wavelets under some very short words)\n  - 'dotted-underline': underline with dotted style",
+      "$ref": "#/definitions/theme",
+      "default": "background-box"
+    },
     "language": {
       "title": "Language of the spellchecker",
       "description": "Language code, e.g. en-us",
