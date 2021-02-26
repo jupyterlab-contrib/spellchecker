@@ -12,6 +12,9 @@
     "url": "https://github.com/jupyterlab-contrib/jupyterlab_spellchecker/issues"
   },
   "license": "BSD-3-Clause",
+  "author": {
+    "name": "JupyterLab Spellchecker Development Team",
+  },
   "contributors": [
     "Iain Barr",
     "Micha\u0142 Krassowski",
