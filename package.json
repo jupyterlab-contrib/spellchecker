@@ -1,5 +1,5 @@
 {
-  "name": "@ijmbarr/jupyterlab_spellchecker",
+  "name": "@jupyterlab-contrib/jupyterlab_spellchecker",
   "version": "0.3.0",
   "description": "A spell checker for jupyterlab.",
   "keywords": [
@@ -7,9 +7,9 @@
     "jupyterlab",
     "jupyterlab-extension"
   ],
-  "homepage": "https://github.com/ijmbarr/jupyterlab_spellchecker",
+  "homepage": "https://github.com/jupyterlab-contrib/jupyterlab_spellchecker",
   "bugs": {
-    "url": "https://github.com/ijmbarr/jupyterlab_spellchecker"
+    "url": "https://github.com/jupyterlab-contrib/jupyterlab_spellchecker"
   },
   "license": "BSD-3-Clause",
   "contributors": [
@@ -28,12 +28,14 @@
   "types": "lib/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ijmbarr/jupyterlab_spellchecker.git"
+    "url": "git+https://github.com/jupyterlab-contrib/jupyterlab_spellchecker.git"
   },
   "scripts": {
     "build": "tsc",
     "clean": "rimraf lib",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "eslint": "eslint . --ext .ts,.tsx --fix",
+    "eslint:check": "eslint . --ext .ts,.tsx"
   },
   "dependencies": {
     "@jupyterlab/application": "^3.0.3",
@@ -63,7 +65,7 @@
   "jupyterlab": {
     "extension": true,
     "schemaDir": "schema",
-    "outputDir": "ijmbarr_jupyterlab_spellchecker/labextension"
+    "outputDir": "jupyterlab_spellchecker/labextension"
   },
   "styleModule": "style/index.js"
 }
