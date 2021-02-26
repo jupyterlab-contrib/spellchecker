@@ -26,7 +26,7 @@ package_data_spec = {
     name: ["*"],
 }
 
-labext_name = "@jupyterlab-contrib/jupyterlab_spellchecker"
+labext_name = "@ijmbarr/jupyterlab_spellchecker"
 
 data_files_spec = [
     ("share/jupyter/labextensions/%s" % labext_name, str(lab_path), "**"),

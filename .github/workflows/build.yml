@@ -29,5 +29,5 @@ jobs:
         jlpm run eslint:check
         python -m pip install .
 
-        jupyter labextension list 2>&1 | grep -ie "@jupyterlab-contrib/jupyterlab_spellchecker.*OK"
+        jupyter labextension list 2>&1 | grep -ie "@ijmbarr/jupyterlab_spellchecker.*OK"
         python -m jupyterlab.browser_check
