@@ -15,7 +15,7 @@ HERE = Path(__file__).parent.resolve()
 # The name of the project
 name = "jupyterlab-spellchecker"
 
-lab_path = (HERE / name / "labextension")
+lab_path = (HERE / name.replace('-', '_') / "labextension")
 
 # Representative files that should exist after a successful build
 jstargets = [
@@ -26,7 +26,7 @@ package_data_spec = {
     name: ["*"],
 }
 
-labext_name = "{{ cookiecutter.labextension_name }}"
+labext_name = "@jupyterlab-contrib/jupyterlab_spellchecker"
 
 data_files_spec = [
     ("share/jupyter/labextensions/%s" % labext_name, str(lab_path), "**"),
