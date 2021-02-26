@@ -1,17 +1,20 @@
 {
   "name": "@ijmbarr/jupyterlab_spellchecker",
-  "version": "0.3.0",
-  "description": "A spell checker for jupyterlab.",
+  "version": "0.4.0",
+  "description": "A spell checker for JupyterLab.",
   "keywords": [
     "jupyter",
     "jupyterlab",
     "jupyterlab-extension"
   ],
-  "homepage": "https://github.com/ijmbarr/jupyterlab_spellchecker",
+  "homepage": "https://github.com/jupyterlab-contrib/jupyterlab_spellchecker",
   "bugs": {
-    "url": "https://github.com/ijmbarr/jupyterlab_spellchecker"
+    "url": "https://github.com/jupyterlab-contrib/jupyterlab_spellchecker/issues"
   },
   "license": "BSD-3-Clause",
+  "author": {
+    "name": "JupyterLab Spellchecker Development Team"
+  },
   "contributors": [
     "Iain Barr",
     "Micha\u0142 Krassowski",
@@ -28,12 +31,25 @@
   "types": "lib/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ijmbarr/jupyterlab_spellchecker.git"
+    "url": "git+https://github.com/jupyterlab-contrib/jupyterlab_spellchecker.git"
   },
   "scripts": {
-    "build": "tsc",
-    "clean": "rimraf lib",
-    "watch": "tsc -w"
+    "build": "jlpm run build:lib && jlpm run build:labextension:dev",
+    "build:prod": "jlpm run build:lib && jlpm run build:labextension",
+    "build:labextension": "jupyter labextension build .",
+    "build:labextension:dev": "jupyter labextension build --development True .",
+    "build:lib": "tsc",
+    "clean": "jlpm run clean:lib",
+    "clean:lib": "rimraf lib tsconfig.tsbuildinfo",
+    "clean:labextension": "rimraf jupyterlab_spellchecker/labextension",
+    "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
+    "eslint": "eslint . --ext .ts,.tsx --fix",
+    "eslint:check": "eslint . --ext .ts,.tsx",
+    "install:extension": "jupyter labextension develop --overwrite .",
+    "prepare": "jlpm run clean && jlpm run build:prod",
+    "watch": "run-p watch:src watch:labextension",
+    "watch:src": "tsc -w",
+    "watch:labextension": "jupyter labextension watch ."
   },
   "dependencies": {
     "@jupyterlab/application": "^3.0.3",
@@ -49,21 +65,21 @@
     "typo-js": "^1.1.0"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^3.0.0-rc.13",
-    "@typescript-eslint/eslint-plugin": "^2.27.0",
-    "@typescript-eslint/parser": "^2.27.0",
-    "eslint": "^7.5.0",
-    "eslint-config-prettier": "^6.10.1",
-    "eslint-plugin-prettier": "^3.1.2",
+    "@jupyterlab/builder": "^3.0.0",
+    "@typescript-eslint/eslint-plugin": "^4.8.1",
+    "@typescript-eslint/parser": "^4.8.1",
+    "eslint": "^7.14.0",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-prettier": "^3.1.4",
     "npm-run-all": "^4.1.5",
-    "prettier": "^1.19.0",
+    "prettier": "^2.1.1",
     "rimraf": "^3.0.2",
     "typescript": "~4.1.3"
   },
   "jupyterlab": {
     "extension": true,
     "schemaDir": "schema",
-    "outputDir": "ijmbarr_jupyterlab_spellchecker/labextension"
+    "outputDir": "jupyterlab_spellchecker/labextension"
   },
   "styleModule": "style/index.js"
 }
