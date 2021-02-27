@@ -213,11 +213,17 @@ class SpellChecker {
       });
   }
 
+  protected _set_theme(name: string) {
+    document.body.setAttribute('data-jp-spellchecker-theme', name);
+  }
+
   update_settings(settings: ISettingRegistry.ISettings) {
     this.settings = settings;
     const tokens = settings.get('ignore').composite as Array<string>;
     this.ignored_tokens = new Set(tokens);
     this.accepted_types = settings.get('mimeTypes').composite as Array<string>;
+    const theme = settings.get('theme').composite as string;
+    this._set_theme(theme);
 
     // read the saved language setting
     const language_code = settings.get('language').composite;
