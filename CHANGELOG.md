@@ -2,6 +2,7 @@
 
 - added wavy-underline and dotted-underline themes which allow to customize how misspelt words are highlighted (#53)
 - development improvements: added GitHub Actions build check and binder badge (#48), binder bot (#54), and publish workflow (#52)
+- fixes: dictionaries were loaded twice, '' characters lead to empty words and problems in the german dictionaries
 
 ### 0.4.0 (2021-02-26)
 
