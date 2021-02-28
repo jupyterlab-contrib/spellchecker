@@ -6,7 +6,6 @@ node_modules/
 *.tsbuildinfo
 *~
 *.ipynb
-yarn.lock
 package-lock.json
 dictionaries/*.py
 download_new_dic.py
