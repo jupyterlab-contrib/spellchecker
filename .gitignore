@@ -116,3 +116,7 @@ dmypy.json
 
 # OSX files
 .DS_Store
+
+
+# hide development labextension
+/*/labextension

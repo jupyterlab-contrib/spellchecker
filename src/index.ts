@@ -499,6 +499,7 @@ class SpellChecker {
           if (stream.eatWhile(this.rx_word_char)) {
             const word = stream.current().replace(/(^')|('$)/g, '');
             if (
+              word !== '' &&                      // don't check empty words
               !word.match(/^\d+$/) &&
               this.dictionary !== undefined &&
               !this.dictionary.check(word) &&
