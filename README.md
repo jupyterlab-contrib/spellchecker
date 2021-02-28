@@ -1,6 +1,6 @@
 # jupyterlab-spellchecker
-![Github Actions Status](https://github.com/jupyterlab-contrib/jupyterlab_spellchecker/workflows/Build/badge.svg)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab-contrib/jupyterlab_spellchecker/master?urlpath=lab)
+![Github Actions Status](https://github.com/jupyterlab-contrib/spellchecker/workflows/Build/badge.svg)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab-contrib/spellchecker/master?urlpath=lab)
 
 A JupyterLab extension highlighting misspelled words in markdown cells within notebooks and in the text files.
 
