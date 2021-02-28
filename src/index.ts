@@ -546,10 +546,8 @@ class SpellChecker {
     }).then(value => {
       if (value.value !== null) {
         this.language = languages.filter(l => l.name === value.value)[0];
-        this.load_dictionary().then(() => {
-          // save the chosen language in the settings
-          this.settings.set('language', this.language.code).catch(console.warn);
-        });
+        // the setup routine will load the dirctionary
+        this.settings.set('language', this.language.code).catch(console.warn);
       }
     });
   }
