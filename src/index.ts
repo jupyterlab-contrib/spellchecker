@@ -150,6 +150,7 @@ class SpellChecker {
   dictionary: any;
   suggestions_menu: Menu;
   status_widget: StatusWidget;
+  status_msg = 'Dictionary not loaded';
 
   // Default Options
   check_spelling = true;
@@ -474,6 +475,8 @@ class SpellChecker {
   }
 
   load_dictionary() {
+    this.status_msg = 'Loading dictionary ...';
+    this.status_widget.update();
     return Promise.all([
       fetch(this.language.aff).then(res => res.text()),
       fetch(this.language.dic).then(res => res.text())
@@ -481,6 +484,7 @@ class SpellChecker {
       this.dictionary = new Typo(this.language.name, values[0], values[1]);
       console.log('Dictionary Loaded ', this.language.name, this.language.code);
 
+      this.status_msg = this.language.name;
       // update the complete UI
       this.status_widget.update();
       this.refresh_state();
@@ -553,7 +557,7 @@ class SpellChecker {
   }
 
   setup_language_picker() {
-    this.status_widget = new StatusWidget(() => this.language.name);
+    this.status_widget = new StatusWidget(() => this.status_msg);
     this.status_widget.node.onclick = () => {
       this.choose_language();
     };
