@@ -1,3 +1,6 @@
+### 0.5.2 (unreleased)
+- added a status message while loading a dictionary (#62)
+
 ### 0.5.0 (2021-02-28)
 
 - added wavy-underline and dotted-underline themes which allow to customize how misspelt words are highlighted (#53)
