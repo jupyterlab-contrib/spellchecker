@@ -482,7 +482,7 @@ class SpellChecker {
       fetch(this.language.dic).then(res => res.text())
     ]).then(values => {
       this.dictionary = new Typo(this.language.name, values[0], values[1]);
-      console.log('Dictionary Loaded ', this.language.name, this.language.code);
+      // console.log('Dictionary Loaded ', this.language.name, this.language.code);
 
       this.status_msg = this.language.name;
       // update the complete UI
