@@ -4,7 +4,7 @@
 
 A JupyterLab extension highlighting misspelled words in markdown cells within notebooks and in the text files.
 
-![](https://raw.githubusercontent.com/krassowski/jupyterlab-spreadsheet-editor/master/demo.gif)
+![](https://raw.githubusercontent.com/jupyterlab-contrib/spellchecker/master/demo.gif)
 
 The JupyterLab extension is based on [the spellchecker Jupyter Notebook extension](https://github.com/ipython-contrib/jupyter_contrib_nbextensions/tree/master/src/jupyter_contrib_nbextensions/nbextensions/spellchecker) and relies on [Typo.js](https://github.com/cfinke/Typo.js) for the actual spell checking. Spellchecker suggestions are available from the context menu.
 
