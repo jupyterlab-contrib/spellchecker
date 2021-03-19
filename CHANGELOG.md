@@ -1,4 +1,4 @@
-### 0.5.2 (unreleased)
+### 0.5.2 (2021-03-19)
 - added a status message while loading a dictionary (#62)
 
 ### 0.5.0 (2021-02-28)
