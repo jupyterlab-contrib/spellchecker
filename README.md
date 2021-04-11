@@ -31,7 +31,7 @@ pip install jupyterlab-spellchecker
 or
 
 ```bash
-conda install jupyterlab-spellchecker
+conda install -c conda-forge jupyterlab-spellchecker
 ```
 
 For JupyterLab 2.x:
