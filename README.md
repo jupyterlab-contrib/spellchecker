@@ -1,6 +1,8 @@
 # jupyterlab-spellchecker
-![Github Actions Status](https://github.com/jupyterlab-contrib/spellchecker/workflows/Build/badge.svg)
+[![Github Actions Status](https://github.com/jupyterlab-contrib/spellchecker/workflows/Build/badge.svg)](https://github.com/jupyterlab-contrib/spellchecker/actions)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab-contrib/spellchecker/master?urlpath=lab)
+[![PyPI version](https://img.shields.io/pypi/v/jupyterlab-spellchecker.svg)](https://pypi.org/project/jupyterlab-spellchecker/)
+[![Conda version](https://img.shields.io/conda/vn/conda-forge/jupyterlab-spellchecker.svg)](https://anaconda.org/conda-forge/jupyterlab-spellchecker)
 
 A JupyterLab extension highlighting misspelled words in markdown cells within notebooks and in the text files.
 
@@ -24,6 +26,12 @@ For JupyterLab 3.x:
 
 ```bash
 pip install jupyterlab-spellchecker
+```
+
+or
+
+```bash
+conda install -c conda-forge jupyterlab-spellchecker
 ```
 
 For JupyterLab 2.x:
