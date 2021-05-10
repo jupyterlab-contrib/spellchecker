@@ -77,6 +77,16 @@
     "typescript": "~4.1.3"
   },
   "jupyterlab": {
+    "discovery": {
+      "server": {
+        "managers": [
+          "pip"
+        ],
+        "base": {
+          "name": "jupyterlab_spellchecker"
+        }
+      }
+    },
     "extension": true,
     "schemaDir": "schema",
     "outputDir": "jupyterlab_spellchecker/labextension"
