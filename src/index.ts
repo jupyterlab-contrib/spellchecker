@@ -105,7 +105,8 @@ class LanguageManager {
       (values: ILanguageManagerResponse) => {
         console.debug('LanguageManager is ready');
         this.languages = values.dictionaries;
-    });
+      }
+    );
   }
 
   /**
