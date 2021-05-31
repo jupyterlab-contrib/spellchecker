@@ -37,7 +37,7 @@
     },
     "language": {
       "title": "Language of the spellchecker",
-      "description": "Language code, e.g. en-us",
+      "description": "Dictionary identifier, e.g. en-us",
       "$ref": "#/definitions/language",
       "default": "en-us"
     },

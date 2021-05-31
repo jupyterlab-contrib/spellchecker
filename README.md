@@ -59,6 +59,7 @@ pip install -e .
 jupyter labextension develop . --overwrite
 # Rebuild extension Typescript source after making changes
 jlpm run build
+pip install pytest
 ```
 
 You can watch the source directory and run JupyterLab at the same time in different terminals to watch for changes in the extension's source and automatically rebuild the extension.
@@ -82,4 +83,10 @@ If there are any issues it might be possible to autofix them with:
 
 ```bash
 jlpm run eslint
+```
+
+Run tests:
+
+```bash
+python -m pytest
 ```
