@@ -47,7 +47,7 @@ def _extract_code(filename):
         filename
     )
     if match:
-        return match.group(1).replace('-', '_')
+        return match.group(1).replace('_', '-')
 
 
 def _scan_for_dictionaries(data_path, log: logging.Logger):
@@ -73,6 +73,7 @@ def _scan_for_dictionaries(data_path, log: logging.Logger):
                 f" {base_name} does not match pre-specified regular expression."
             )
             continue
+        code = code.replace('-', '_')
 
         aff_path = path / (base_name + '.aff')
 
