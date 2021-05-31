@@ -8,6 +8,7 @@ from jupyterlab_spellchecker.dictionaries import _extract_code
     [
         # frami matches as a variant
         ['de_AT_frami', 'de-AT-frami'],
+        ['en_GB-ise', 'en-GB'],
         ['pl', 'pl'],
         ['a', None],
         ['THIS-IS-NOT-A-CODE', None],

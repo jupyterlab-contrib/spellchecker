@@ -85,18 +85,18 @@ def _scan_for_dictionaries(data_path, log: logging.Logger):
             continue
 
         try:
-            locale_data = babel.Locale.parse(identifier)
+            locale_data = babel.Locale.parse(code)
             display_name = locale_data.get_display_name()
         except ValueError:
             display_name = base_name
             log.warning(
                 f"Could not obtain language name for {identifier} dictionary from {path}:"
-                f" {identifier} does not appear to be a valid locale identifier."
+                f" {code} does not appear to be a valid locale code."
             )
         except babel.core.UnknownLocaleError:
             log.warning(
                 f"Could not obtain language name for {identifier} dictionary from {path}:"
-                f" {identifier} is not a known locale in the installed version of babel."
+                f" {code} is not a known locale in the installed version of babel."
             )
             display_name = base_name
 
