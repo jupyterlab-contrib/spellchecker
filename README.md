@@ -15,7 +15,18 @@ The extension provides (Hunspell) [SCOWL](http://wordlist.aspell.net/) dictionar
 - French,
 - German (Germany, Austria, Switzerland)
 - Portuguese,
-- Spanish.
+- Spanish
+
+and will also use the Hunspell dictionaries installed in [known paths](https://github.com/jupyterlab-contrib/spellchecker/search?q=OS_SPECIFIC_PATHS) which vary by operating systems.
+If you use JupyterLab in a browser running on a different computer than the jupyter server, please note that the dictionaries need to be installed on the server machine.
+
+You can add custom dictionary by placing Hunspell files it in `dictionaries` folder in one of the `data` locations as returned by:
+
+```bash
+jupyter --paths
+```
+
+You should place two files with extensions `.aff` and `.dic`, and name following [BCP 47](https://datatracker.ietf.org/doc/html/rfc5646#section-2.1) standards.
 
 ## JupyterLab Version
 The extension has been tested up to JupyterLab version 3.0.
