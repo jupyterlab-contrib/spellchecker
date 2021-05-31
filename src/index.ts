@@ -18,6 +18,8 @@ import { CodeMirrorEditor, ICodeMirror } from '@jupyterlab/codemirror';
 
 import CodeMirror from 'codemirror';
 
+import { requestAPI } from './handler';
+
 import '../style/index.css';
 import spellcheckSvg from '../style/icons/ic-baseline-spellcheck.svg';
 
@@ -62,73 +64,43 @@ interface ILanguage {
   dic: string;
 }
 
-// English dictionaries come from https://github.com/en-wl/wordlist
-import en_aff from 'file-loader!../dictionaries/en_US.aff';
-import en_dic from 'file-loader!../dictionaries/en_US.dic';
+class LanguageManager {
+  languages: ILanguage[];
 
-import en_gb_aff from 'file-loader!../dictionaries/en_GB-ise.aff';
-import en_gb_dic from 'file-loader!../dictionaries/en_GB-ise.dic';
+  public ready: Promise<any>;
 
-import en_ca_aff from 'file-loader!../dictionaries/en_CA.aff';
-import en_ca_dic from 'file-loader!../dictionaries/en_CA.dic';
-
-import en_au_aff from 'file-loader!../dictionaries/en_AU.aff';
-import en_au_dic from 'file-loader!../dictionaries/en_AU.dic';
-
-import de_de_aff from 'file-loader!../dictionaries/de_DE_frami.aff';
-import de_de_dic from 'file-loader!../dictionaries/de_DE_frami.dic';
-
-import de_at_aff from 'file-loader!../dictionaries/de_AT_frami.aff';
-import de_at_dic from 'file-loader!../dictionaries/de_AT_frami.dic';
-
-import de_ch_aff from 'file-loader!../dictionaries/de_CH_frami.aff';
-import de_ch_dic from 'file-loader!../dictionaries/de_CH_frami.dic';
-
-import fr_fr_aff from 'file-loader!../dictionaries/fr.aff';
-import fr_fr_dic from 'file-loader!../dictionaries/fr.dic';
-
-import es_es_aff from 'file-loader!../dictionaries/es_ES.aff';
-import es_es_dic from 'file-loader!../dictionaries/es_ES.dic';
-
-//import it_it_aff from 'file-loader!../dictionaries/it_IT.aff';
-//import it_it_dic from 'file-loader!../dictionaries/it_IT.dic';
-
-import pt_pt_aff from 'file-loader!../dictionaries/pt_PT.aff';
-import pt_pt_dic from 'file-loader!../dictionaries/pt_PT.dic';
-
-const languages: ILanguage[] = [
-  { code: 'en-us', name: 'English (American)', aff: en_aff, dic: en_dic },
-  { code: 'en-gb', name: 'English (British)', aff: en_gb_aff, dic: en_gb_dic },
-  { code: 'en-ca', name: 'English (Canadian)', aff: en_ca_aff, dic: en_ca_dic },
-  {
-    code: 'en-au',
-    name: 'English (Australian)',
-    aff: en_au_aff,
-    dic: en_au_dic
-  },
-  {
-    code: 'de-de',
-    name: 'Deutsch (Deutschland)',
-    aff: de_de_aff,
-    dic: de_de_dic
-  },
-  {
-    code: 'de-at',
-    name: 'Deutsch (Österreich)',
-    aff: de_at_aff,
-    dic: de_at_dic
-  },
-  { code: 'de-ch', name: 'Deutsch (Schweiz)', aff: de_ch_aff, dic: de_ch_dic },
-  { code: 'fr-fr', name: 'Français (France)', aff: fr_fr_aff, dic: fr_fr_dic },
-  { code: 'es-es', name: 'Español (España)', aff: es_es_aff, dic: es_es_dic },
-  //{code: 'it-it', name: 'Italiano (Italia)', aff: it_it_aff, dic: it_it_dic},
-  {
-    code: 'pt-pt',
-    name: 'Português (Portugal)',
-    aff: pt_pt_aff,
-    dic: pt_pt_dic
+  // initialise the manager
+  // mainly reading the definitions from the external extension
+  constructor() {
+    // read the list of languages from the external extension
+    this.ready = requestAPI<any>('language_manager').then(values => {
+      console.debug('LanguageManager is ready');
+      this.languages = values;
+    });
   }
-];
+
+  // get an array of languages, put "language" in front of the list
+  // the list is alphabetically sorted
+  getchoices(language: ILanguage) {
+    return [
+      language,
+      ...this.languages
+        .filter(l => l.name !== language.name)
+        .sort((a, b) => a.name.localeCompare(b.name))
+    ];
+  }
+
+  // select the language by the name entry
+  getlanguagebyname(name: string) {
+    return this.languages.filter(l => l.name === name)[0];
+  }
+
+  // select the language by the code entry
+  // code was read by settings, so the type is not specifies -> any
+  getlanguagebycode(code: string | any) {
+    return this.languages.filter(l => l.code === code)[0];
+  }
+}
 
 class StatusWidget extends ReactWidget {
   language_source: () => string;
@@ -155,6 +127,7 @@ class SpellChecker {
   // Default Options
   check_spelling = true;
   language: ILanguage;
+  language_manager: LanguageManager;
   rx_word_char = /[^-[\]{}():/!;&@$£%§<>"*+=?.,~\\^|_`#±\s\t]/;
   rx_non_word_char = /[-[\]{}():/!;&@$£%§<>"*+=?.,~\\^|_`#±\s\t]/;
   ignored_tokens: Set<string> = new Set();
@@ -170,8 +143,8 @@ class SpellChecker {
     protected palette?: ICommandPalette,
     protected status_bar?: IStatusBar
   ) {
-    // have at least a default
-    this.language = languages[0];
+    // use the language_manager
+    this.language_manager = new LanguageManager();
 
     // read the settings
     this.setup_settings();
@@ -202,7 +175,11 @@ class SpellChecker {
   // move the load_dictionary into the setup routine, because then
   // we know that the values are set correctly!
   setup_settings() {
-    Promise.all([this.setting_registry.load(extension.id), this.app.restored])
+    Promise.all([
+      this.setting_registry.load(extension.id),
+      this.app.restored,
+      this.language_manager.ready
+    ])
       .then(([settings]) => {
         this.update_settings(settings);
         settings.changed.connect(() => {
@@ -228,7 +205,9 @@ class SpellChecker {
 
     // read the saved language setting
     const language_code = settings.get('language').composite;
-    const user_language = languages.filter(l => l.code === language_code)[0];
+    const user_language = this.language_manager.getlanguagebycode(
+      language_code
+    );
     if (user_language === undefined) {
       console.warn('The language ' + language_code + ' is not supported!');
     } else {
@@ -542,19 +521,15 @@ class SpellChecker {
   }
 
   choose_language() {
-    // show the current language first, then all others
-    const choices = [
-      this.language,
-      ...languages.filter(l => l.name !== this.language.name)
-    ];
+    const choices = this.language_manager.getchoices(this.language);
 
     InputDialog.getItem({
       title: 'Choose spellchecker language',
       items: choices.map(language => language.name)
     }).then(value => {
       if (value.value !== null) {
-        this.language = languages.filter(l => l.name === value.value)[0];
-        // the setup routine will load the dirctionary
+        this.language = this.language_manager.getlanguagebyname(value.value);
+        // the setup routine will load the dictionary
         this.settings.set('language', this.language.code).catch(console.warn);
       }
     });

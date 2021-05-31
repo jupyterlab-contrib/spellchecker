@@ -1,3 +1,7 @@
+### 0.5.3 
+- change the dictionary loading mechanism from internal static into a server extension (#69)
+- add the possibility to add custom dictionalry (#66)
+
 ### 0.5.2 (2021-03-19)
 - added a status message while loading a dictionary (#62)
 
