@@ -69,7 +69,7 @@ runtime:
     /home/your_name/.local/share/jupyter/runtime
 ```
 
-and you want to add Polish language, you would put `pl_PL.aff` and `pl_PL.dic` in `/home/your_name/.local/share/jupyter/dictionaries` (you will need to create this folder), so that the final structure looks similar too:
+and you want to add Polish language, you would put `pl_PL.aff` and `pl_PL.dic` in `/home/your_name/.local/share/jupyter/dictionaries` (you will need to create this folder), so that the final structure looks similar to:
 
 ```
 /home/your_name/.local/share/jupyter
