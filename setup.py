@@ -31,7 +31,7 @@ labext_name = "@ijmbarr/jupyterlab_spellchecker"
 data_files_spec = [
     ("share/jupyter/labextensions/%s" % labext_name, str(lab_path), "**"),
     ("share/jupyter/labextensions/%s" % labext_name, str(HERE), "install.json"),
-    ("share/jupyter/dictionaries", str(HERE), "dictionaries/**"),
+    ("share/jupyter/dictionaries", str(HERE / "dictionaries"), "**"),
     ("etc/jupyter/jupyter_notebook_config.d", "jupyter-config/jupyter_notebook_config.d", "jupyterlab_spellchecker.json"),
     ("etc/jupyter/jupyter_server_config.d", "jupyter-config/jupyter_server_config.d", "jupyterlab_spellchecker.json"),
 ]
