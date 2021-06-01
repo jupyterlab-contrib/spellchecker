@@ -1,4 +1,4 @@
-### 0.6.0
+### 0.6.0 (2021-06-01)
 - change the dictionary loading mechanism from internal static into a server extension (#69)
   - dictionaries will now be discovered in operating system specific paths if available
   - choice is now possible from one of multiple dictionaries using the same locale
