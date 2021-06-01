@@ -57,48 +57,90 @@ interface IContext {
   position: CodeMirror.Position;
 }
 
-interface ILanguage {
+/**
+ * Dictionary data defined by a pair of Hunspell .aff and .dic files.
+ * More than one dictionary may exist for a given language.
+ */
+interface IDictionary {
+  /**
+   * Identifier of the dictionary consisting of the filename without the .aff/.dic suffix
+   * and path information if needed to distinguish from other dictionaries.
+   */
+  id: string;
+  /**
+   * BCP 47 code identifier.
+   */
   code: string;
+  /**
+   * Display name, usually in the form "Language (Region)".
+   */
   name: string;
+  /**
+   * Path to the .aff file.
+   */
   aff: string;
+  /**
+   * Path to the .dic file.
+   */
   dic: string;
 }
 
+interface ILanguageManagerResponse {
+  version: string;
+  dictionaries: IDictionary[];
+}
+
 class LanguageManager {
-  languages: ILanguage[];
+  languages: IDictionary[];
 
   public ready: Promise<any>;
 
-  // initialise the manager
-  // mainly reading the definitions from the external extension
+  /**
+   * initialise the manager
+   * mainly reading the definitions from the external extension
+   */
   constructor() {
     // read the list of languages from the external extension
-    this.ready = requestAPI<any>('language_manager').then(values => {
-      console.debug('LanguageManager is ready');
-      this.languages = values;
-    });
+    this.ready = requestAPI<any>('language_manager').then(
+      (values: ILanguageManagerResponse) => {
+        console.debug('LanguageManager is ready');
+        this.languages = values.dictionaries;
+      }
+    );
   }
 
-  // get an array of languages, put "language" in front of the list
-  // the list is alphabetically sorted
-  getchoices(language: ILanguage) {
+  /**
+   * get an array of languages, put "language" in front of the list
+   * the list is alphabetically sorted
+   */
+  getChoices(language: IDictionary) {
     return [
       language,
       ...this.languages
-        .filter(l => l.name !== language.name)
+        .filter(l => l.id !== language.id)
         .sort((a, b) => a.name.localeCompare(b.name))
     ];
   }
 
-  // select the language by the name entry
-  getlanguagebyname(name: string) {
-    return this.languages.filter(l => l.name === name)[0];
-  }
-
-  // select the language by the code entry
-  // code was read by settings, so the type is not specifies -> any
-  getlanguagebycode(code: string | any) {
-    return this.languages.filter(l => l.code === code)[0];
+  /**
+   * select the language by the identifier
+   */
+  getLanguageByIdentifier(identifier: string): IDictionary | undefined {
+    const exactMatch = this.languages.find(l => l.id === identifier);
+    if (exactMatch) {
+      return exactMatch;
+    }
+    // approximate matches support transition from the 0.5 version (and older)
+    // that used incorrect codes as language identifiers
+    const approximateMatch = this.languages.find(
+      l => l.id.toLowerCase() === identifier.replace('-', '_').toLowerCase()
+    );
+    if (approximateMatch) {
+      console.warn(
+        `Language identifier ${identifier} has a non-exact match, please update it to ${approximateMatch.id}`
+      );
+      return approximateMatch;
+    }
   }
 }
 
@@ -126,7 +168,7 @@ class SpellChecker {
 
   // Default Options
   check_spelling = true;
-  language: ILanguage;
+  language: IDictionary;
   language_manager: LanguageManager;
   rx_word_char = /[^-[\]{}():/!;&@$£%§<>"*+=?.,~\\^|_`#±\s\t]/;
   rx_non_word_char = /[-[\]{}():/!;&@$£%§<>"*+=?.,~\\^|_`#±\s\t]/;
@@ -204,12 +246,11 @@ class SpellChecker {
     this._set_theme(theme);
 
     // read the saved language setting
-    const language_code = settings.get('language').composite;
-    const user_language = this.language_manager.getlanguagebycode(
-      language_code
-    );
+    const language_id = settings.get('language').composite as string;
+    const user_language =
+      this.language_manager.getLanguageByIdentifier(language_id);
     if (user_language === undefined) {
-      console.warn('The language ' + language_code + ' is not supported!');
+      console.warn('The language ' + language_id + ' is not supported!');
     } else {
       this.language = user_language;
       // load the dictionary
@@ -461,11 +502,7 @@ class SpellChecker {
       fetch(this.language.dic).then(res => res.text())
     ]).then(values => {
       this.dictionary = new Typo(this.language.name, values[0], values[1]);
-      console.debug(
-        'Dictionary Loaded ',
-        this.language.name,
-        this.language.code
-      );
+      console.debug('Dictionary Loaded ', this.language.name, this.language.id);
 
       this.status_msg = this.language.name;
       // update the complete UI
@@ -521,16 +558,32 @@ class SpellChecker {
   }
 
   choose_language() {
-    const choices = this.language_manager.getchoices(this.language);
+    const choices = this.language_manager.getChoices(this.language);
+
+    const choiceStrings = choices.map(
+      // note: two dictionaries may exist for a language with the same name,
+      // so we append the actual id of the dictionary in the square brackets.
+      dictionary => dictionary.name + ' [' + dictionary.id + ']'
+    );
 
     InputDialog.getItem({
       title: 'Choose spellchecker language',
-      items: choices.map(language => language.name)
+      items: choiceStrings
     }).then(value => {
       if (value.value !== null) {
-        this.language = this.language_manager.getlanguagebyname(value.value);
+        const index = choiceStrings.indexOf(value.value);
+        const lang = this.language_manager.getLanguageByIdentifier(
+          choices[index].id
+        );
+        if (!lang) {
+          console.error(
+            'Language could not be matched - please report this as an issue'
+          );
+          return;
+        }
+        this.language = lang;
         // the setup routine will load the dictionary
-        this.settings.set('language', this.language.code).catch(console.warn);
+        this.settings.set('language', this.language.id).catch(console.warn);
       }
     });
   }

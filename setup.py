@@ -31,6 +31,7 @@ labext_name = "@ijmbarr/jupyterlab_spellchecker"
 data_files_spec = [
     ("share/jupyter/labextensions/%s" % labext_name, str(lab_path), "**"),
     ("share/jupyter/labextensions/%s" % labext_name, str(HERE), "install.json"),
+    ("share/jupyter/dictionaries", str(HERE / "dictionaries"), "**"),
     ("etc/jupyter/jupyter_notebook_config.d", "jupyter-config/jupyter_notebook_config.d", "jupyterlab_spellchecker.json"),
     ("etc/jupyter/jupyter_server_config.d", "jupyter-config/jupyter_server_config.d", "jupyterlab_spellchecker.json"),
 ]
@@ -60,6 +61,10 @@ setup_args = dict(
     name=name,
     version=pkg_json["version"],
     url=pkg_json["homepage"],
+    project_urls={
+        'Bug Tracker': pkg_json["bugs"]["url"],
+        'Source Code': pkg_json["homepage"]
+    },
     author=pkg_json["author"]["name"],
     description=pkg_json["description"],
     license=pkg_json["license"],
@@ -68,6 +73,7 @@ setup_args = dict(
     cmdclass=cmdclass,
     packages=setuptools.find_packages(),
     install_requires=[
+        "babel",
         "jupyterlab~=3.0",
     ],
     zip_safe=False,

@@ -80,10 +80,11 @@
     "discovery": {
       "server": {
         "managers": [
-          "pip"
+          "pip",
+          "conda"
         ],
         "base": {
-          "name": "jupyterlab_spellchecker"
+          "name": "jupyterlab-spellchecker"
         }
       }
     },

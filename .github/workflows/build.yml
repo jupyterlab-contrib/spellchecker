@@ -31,3 +31,8 @@ jobs:
 
         jupyter labextension list 2>&1 | grep -ie "@ijmbarr/jupyterlab_spellchecker.*OK"
         python -m jupyterlab.browser_check
+    - name: Install test dependencies
+      run: python -m pip install pytest
+    - name: Run python tests
+      run: |
+        python -m pytest
