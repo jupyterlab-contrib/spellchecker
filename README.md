@@ -101,9 +101,9 @@ Some good sources of dictionaries include:
 #### Using online dictionaries
 
 An alternative to saving the dictionary on your own disk (or more accurately on the disk where jupyter-server is set up)
-is fetching the dictionaries from a remote URL. This requires an Internet connection to loading the dictionary
-(each time when you open JupyterLab or change the dictionary), but still might be useful, for example if you do not
-have permissions to add dictionaries in a remote JupyterHub deployment.
+is fetching the dictionaries from a remote URL. This requires an Internet connection to load the dictionary
+(each time when you open JupyterLab or change the dictionary), and might be useful if you are not able
+to save dictionaries on disk (e.g. when using JupyterLab on JupyterHub configured by someone else).
 
 To configure the online dictionaries go to *Advanced Settings Editor* → *Spellchecker*
 and set `onlineDictionaries` to an array of JSON objects like in the example below:
