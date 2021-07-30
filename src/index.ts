@@ -15,6 +15,11 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
 import { Cell } from '@jupyterlab/cells';
 import { CodeMirrorEditor, ICodeMirror } from '@jupyterlab/codemirror';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 
 import CodeMirror from 'codemirror';
 
@@ -39,11 +44,6 @@ const enum CommandIDs {
   updateSuggestions = 'spellchecker:update-suggestions',
   chooseLanguage = 'spellchecker:choose-language'
 }
-
-const TEXT_SUGGESTIONS_AVAILABLE = 'Adjust spelling to';
-const TEXT_NO_SUGGESTIONS = 'No spellcheck suggestions';
-
-const PALETTE_CATEGORY = 'Spell Checker';
 
 interface IWord {
   line: number;
@@ -162,7 +162,7 @@ class SpellChecker {
   dictionary: any;
   suggestions_menu: Menu;
   status_widget: StatusWidget;
-  status_msg = 'Dictionary not loaded';
+  status_msg: string;
 
   // Default Options
   check_spelling = true;
@@ -173,6 +173,10 @@ class SpellChecker {
   ignored_tokens: Set<string> = new Set();
   settings: ISettingRegistry.ISettings;
   accepted_types: string[];
+  private _trans: TranslationBundle;
+  readonly TEXT_SUGGESTIONS_AVAILABLE: string;
+  readonly TEXT_NO_SUGGESTIONS: string;
+  readonly PALETTE_CATEGORY: string;
 
   constructor(
     protected app: JupyterFrontEnd,
@@ -180,11 +184,18 @@ class SpellChecker {
     protected editor_tracker: IEditorTracker,
     protected setting_registry: ISettingRegistry,
     protected code_mirror: ICodeMirror,
-    protected palette?: ICommandPalette,
-    protected status_bar?: IStatusBar
+    translator: ITranslator,
+    protected palette?: ICommandPalette | null,
+    protected status_bar?: IStatusBar | null
   ) {
     // use the language_manager
     this.language_manager = new LanguageManager();
+    this._trans = translator.load('jupyterlab-spellchecker');
+
+    this.status_msg = this._trans.__('Dictionary not loaded');
+    this.TEXT_SUGGESTIONS_AVAILABLE = this._trans.__('Adjust spelling to');
+    this.TEXT_NO_SUGGESTIONS = this._trans.__('No spellcheck suggestions');
+    this.PALETTE_CATEGORY = this._trans.__('Spell Checker');
 
     // read the settings
     this.setup_settings();
@@ -313,7 +324,7 @@ class SpellChecker {
 
   setup_button() {
     this.app.commands.addCommand(CommandIDs.toggle, {
-      label: 'Toggle spellchecker',
+      label: this._trans.__('Toggle spellchecker'),
       execute: () => {
         this.toggle_spellcheck();
       }
@@ -321,7 +332,7 @@ class SpellChecker {
     if (this.palette) {
       this.palette.addItem({
         command: CommandIDs.toggle,
-        category: PALETTE_CATEGORY
+        category: this.PALETTE_CATEGORY
       });
     }
   }
@@ -373,7 +384,7 @@ class SpellChecker {
 
   setup_suggestions() {
     this.suggestions_menu = new Menu({ commands: this.app.commands });
-    this.suggestions_menu.title.label = TEXT_SUGGESTIONS_AVAILABLE;
+    this.suggestions_menu.title.label = this.TEXT_SUGGESTIONS_AVAILABLE;
     this.suggestions_menu.title.icon = spellcheckIcon.bindprops({
       stylesheet: 'menuItem'
     });
@@ -412,7 +423,7 @@ class SpellChecker {
       execute: () => {
         this.ignore();
       },
-      label: 'Ignore'
+      label: this._trans.__('Ignore')
     });
 
     this.app.contextMenu.addItem({
@@ -459,12 +470,12 @@ class SpellChecker {
           args: { name: suggestion }
         });
       }
-      this.suggestions_menu.title.label = TEXT_SUGGESTIONS_AVAILABLE;
+      this.suggestions_menu.title.label = this.TEXT_SUGGESTIONS_AVAILABLE;
       this.suggestions_menu.title.className = '';
       this.suggestions_menu.setHidden(false);
     } else {
       this.suggestions_menu.title.className = 'lm-mod-disabled';
-      this.suggestions_menu.title.label = TEXT_NO_SUGGESTIONS;
+      this.suggestions_menu.title.label = this.TEXT_NO_SUGGESTIONS;
       this.suggestions_menu.setHidden(true);
     }
   }
@@ -499,7 +510,7 @@ class SpellChecker {
         reject('Cannot load dictionary: no language set')
       );
     }
-    this.status_msg = 'Loading dictionary ...';
+    this.status_msg = this._trans.__('Loading dictionary…');
     this.status_widget.update();
     return Promise.all([
       fetch(language.aff).then(res => res.text()),
@@ -571,7 +582,7 @@ class SpellChecker {
     );
 
     InputDialog.getItem({
-      title: 'Choose spellchecker language',
+      title: this._trans.__('Choose spellchecker language'),
       items: choiceStrings
     }).then(value => {
       if (value.value !== null) {
@@ -599,13 +610,13 @@ class SpellChecker {
     };
     this.app.commands.addCommand(CommandIDs.chooseLanguage, {
       execute: args => this.choose_language(),
-      label: 'Choose spellchecker language'
+      label: this._trans.__('Choose spellchecker language')
     });
 
     if (this.palette) {
       this.palette.addItem({
         command: CommandIDs.chooseLanguage,
-        category: PALETTE_CATEGORY
+        category: this.PALETTE_CATEGORY
       });
     }
 
@@ -627,8 +638,9 @@ function activate(
   editor_tracker: IEditorTracker,
   setting_registry: ISettingRegistry,
   code_mirror: ICodeMirror,
-  palette: ICommandPalette,
-  status_bar: IStatusBar
+  translator: ITranslator | null,
+  palette: ICommandPalette | null,
+  status_bar: IStatusBar | null
 ): void {
   console.log('Attempting to load spellchecker');
   const sp = new SpellChecker(
@@ -637,6 +649,7 @@ function activate(
     editor_tracker,
     setting_registry,
     code_mirror,
+    translator || nullTranslator,
     palette,
     status_bar
   );
@@ -650,7 +663,7 @@ const extension: JupyterFrontEndPlugin<void> = {
   id: '@ijmbarr/jupyterlab_spellchecker:plugin',
   autoStart: true,
   requires: [INotebookTracker, IEditorTracker, ISettingRegistry, ICodeMirror],
-  optional: [ICommandPalette, IStatusBar],
+  optional: [ITranslator, ICommandPalette, IStatusBar],
   activate: activate
 };
 
