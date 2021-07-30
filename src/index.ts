@@ -113,13 +113,11 @@ class LanguageManager {
    * get an array of languages, put "language" in front of the list
    * the list is alphabetically sorted
    */
-  getChoices(language: IDictionary) {
-    return [
-      language,
-      ...this.languages
-        .filter(l => l.id !== language.id)
-        .sort((a, b) => a.name.localeCompare(b.name))
-    ];
+  getChoices(language: IDictionary | undefined) {
+    const options = language
+      ? [language, ...this.languages.filter(l => l.id !== language.id)]
+      : this.languages;
+    return options.sort((a, b) => a.name.localeCompare(b.name));
   }
 
   /**
@@ -168,7 +166,7 @@ class SpellChecker {
 
   // Default Options
   check_spelling = true;
-  language: IDictionary;
+  language: IDictionary | undefined;
   language_manager: LanguageManager;
   rx_word_char = /[^-[\]{}():/!;&@$£%§<>"*+=?.,~\\^|_`#±\s\t]/;
   rx_non_word_char = /[-[\]{}():/!;&@$£%§<>"*+=?.,~\\^|_`#±\s\t]/;
@@ -495,16 +493,22 @@ class SpellChecker {
   }
 
   load_dictionary() {
+    const language = this.language;
+    if (!language) {
+      return new Promise((accept, reject) =>
+        reject('Cannot load dictionary: no language set')
+      );
+    }
     this.status_msg = 'Loading dictionary ...';
     this.status_widget.update();
     return Promise.all([
-      fetch(this.language.aff).then(res => res.text()),
-      fetch(this.language.dic).then(res => res.text())
+      fetch(language.aff).then(res => res.text()),
+      fetch(language.dic).then(res => res.text())
     ]).then(values => {
-      this.dictionary = new Typo(this.language.name, values[0], values[1]);
-      console.debug('Dictionary Loaded ', this.language.name, this.language.id);
+      this.dictionary = new Typo(language.name, values[0], values[1]);
+      console.debug('Dictionary Loaded ', language.name, language.id);
 
-      this.status_msg = this.language.name;
+      this.status_msg = language.name;
       // update the complete UI
       this.status_widget.update();
       this.refresh_state();
