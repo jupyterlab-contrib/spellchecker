@@ -8,14 +8,14 @@
     "noImplicitAny": true,
     "noEmitOnError": true,
     "noUnusedLocals": true,
-    "module": "commonjs",
+    "module": "esnext",
     "moduleResolution": "node",
     "strict": true,
+    "strictNullChecks": true,
     "strictPropertyInitialization": false,
-    "target": "ES6",
+    "target": "es2017",
     "outDir": "lib",
     "rootDir": "src",
-    "lib": ["ES5", "ES6", "ES2015.Promise", "DOM"],
     "types": []
   },
   "include": ["src/*"]
