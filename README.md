@@ -8,7 +8,8 @@ A JupyterLab extension highlighting misspelled words in markdown cells within no
 
 ![](https://raw.githubusercontent.com/jupyterlab-contrib/spellchecker/master/demo.gif)
 
-The JupyterLab extension is based on [the spellchecker Jupyter Notebook extension](https://github.com/ipython-contrib/jupyter_contrib_nbextensions/tree/master/src/jupyter_contrib_nbextensions/nbextensions/spellchecker) and relies on [Typo.js](https://github.com/cfinke/Typo.js) for the actual spell checking. Spellchecker suggestions are available from the context menu.
+The JupyterLab extension is based on [the spellchecker Jupyter Notebook extension](https://github.com/ipython-contrib/jupyter_contrib_nbextensions/tree/master/src/jupyter_contrib_nbextensions/nbextensions/spellchecker) and relies on [Typo.js](https://github.com/cfinke/Typo.js) for the actual spell checking.
+Spellchecker suggestions are available from the context menu. The style of the highlights can be customized in the *Advanced Settings Editor*.
 
 The extension provides (Hunspell) [SCOWL](http://wordlist.aspell.net/) dictionaries for:
 - American, British, Canadian, and Australian English
@@ -97,6 +98,26 @@ Some good sources of dictionaries include:
 - [Chromium](https://chromium.googlesource.com/chromium/deps/hunspell_dictionaries/+/master) repository
 - (if you know of any other quality resources please send a PR to add them here)
 
+#### Using online dictionaries
+
+An alternative to saving the dictionary on your own disk (or more accurately on the disk where jupyter-server is set up)
+is fetching the dictionaries from a remote URL. This requires an Internet connection to loading the dictionary
+(each time when you open JupyterLab or change the dictionary), but still might be useful, for example if you do not
+have permissions to add dictionaries in a remote JupyterHub deployment.
+
+To configure the online dictionaries go to *Advanced Settings Editor* → *Spellchecker*
+and set `onlineDictionaries` to an array of JSON objects like in the example below:
+
+```json
+[
+    {
+        "id": "en_US-online",
+        "aff": "https://cdn.jsdelivr.net/codemirror.spell-checker/latest/en_US.aff",
+        "dic": "https://cdn.jsdelivr.net/codemirror.spell-checker/latest/en_US.dic",
+        "name": "My favorite variant of English"
+    }
+]
+```
 
 ## Contributing
 

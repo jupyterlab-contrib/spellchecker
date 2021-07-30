@@ -19,6 +19,30 @@
         "type": "string"
       }
     },
+    "onlineDictionaries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Unique identifier"
+          },
+          "name": {
+            "type": "string",
+            "title": "Display name"
+          },
+          "aff": {
+            "type": "string",
+            "title": "URL address of the .aff file"
+          },
+          "dic": {
+            "type": "string",
+            "title": "URL address of the .dic file"
+          }
+        }
+      }
+    },
     "theme": {
       "type": "string",
       "enum": [
@@ -55,6 +79,12 @@
         "text/plain",
         "text/x-ipythongfm"
       ]
+    },
+    "onlineDictionaries": {
+      "title": "Online dictionaries",
+      "description": "A list of online dictionaries to use if installing dictionaries in data path of jupyter-server is not possible or not desirable. For example:\n\n[\n    {\n        \"id\": \"pl_PL-online\",\n        \"aff\": \"http://some-url/pl_PL.aff\",\n        \"dic\": \"http://some-url/pl_PL.dic\",\n        \"name\": \"polski (Polska)\"\n    }\n]",
+      "$ref": "#/definitions/onlineDictionaries",
+      "default": []
     }
   },
   "additionalProperties": false,
