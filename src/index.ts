@@ -11,6 +11,7 @@ import {
   ReactWidget
 } from '@jupyterlab/apputils';
 import { Menu } from '@lumino/widgets';
+import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
 import { Cell } from '@jupyterlab/cells';
@@ -61,7 +62,7 @@ interface IContext {
  * Dictionary data defined by a pair of Hunspell .aff and .dic files.
  * More than one dictionary may exist for a given language.
  */
-interface IDictionary {
+interface IDictionary extends ReadonlyPartialJSONObject {
   /**
    * Identifier of the dictionary consisting of the filename without the .aff/.dic suffix
    * and path information if needed to distinguish from other dictionaries.
@@ -69,8 +70,9 @@ interface IDictionary {
   id: string;
   /**
    * BCP 47 code identifier.
+   * Absent for online dictionaries.
    */
-  code: string;
+  code?: string;
   /**
    * Display name, usually in the form "Language (Region)".
    */
@@ -83,15 +85,20 @@ interface IDictionary {
    * Path to the .dic file.
    */
   dic: string;
+  /**
+   * Indicated whether the dictionary is online.
+   */
+  isOnline: boolean;
 }
 
 interface ILanguageManagerResponse {
   version: string;
-  dictionaries: IDictionary[];
+  dictionaries: Omit<IDictionary, 'isOnline'>[];
 }
 
 class LanguageManager {
-  languages: IDictionary[];
+  protected serverDictionaries: IDictionary[];
+  protected onlineDictionaries: IDictionary[];
 
   public ready: Promise<any>;
 
@@ -99,14 +106,54 @@ class LanguageManager {
    * initialise the manager
    * mainly reading the definitions from the external extension
    */
-  constructor() {
-    // read the list of languages from the external extension
-    this.ready = requestAPI<any>('language_manager').then(
-      (values: ILanguageManagerResponse) => {
-        console.debug('LanguageManager is ready');
-        this.languages = values.dictionaries;
+  constructor(settingsRegistry: ISettingRegistry) {
+    const loadSettings = settingsRegistry.load(extension.id).then(settings => {
+      this.updateSettings(settings);
+      settings.changed.connect(() => {
+        this.updateSettings(settings);
+      });
+    });
+
+    this.ready = Promise.all([
+      this.fetchServerDictionariesList(),
+      loadSettings
+    ]).then(() => {
+      console.debug('LanguageManager is ready');
+    });
+  }
+
+  protected updateSettings(settings: ISettingRegistry.ISettings) {
+    if (settings) {
+      this.onlineDictionaries = (
+        settings.get('onlineDictionaries').composite as Omit<
+          IDictionary,
+          'isOnline' | 'code'
+        >[]
+      ).map(dictionary => {
+        return { ...dictionary, isOnline: true } as IDictionary;
+      });
+    }
+  }
+
+  /**
+   * Read the list of languages from the server extension
+   */
+  protected fetchServerDictionariesList(): Promise<void> {
+    return requestAPI<ILanguageManagerResponse>('language_manager').then(
+      values => {
+        console.debug('Dictionaries fetched from server');
+        this.serverDictionaries = values.dictionaries.map(dictionary => {
+          return {
+            ...dictionary,
+            isOnline: false
+          } as IDictionary;
+        });
       }
     );
+  }
+
+  get dictionaries(): IDictionary[] {
+    return [...this.serverDictionaries, ...this.onlineDictionaries];
   }
 
   /**
@@ -115,8 +162,8 @@ class LanguageManager {
    */
   getChoices(language: IDictionary | undefined) {
     const options = language
-      ? [language, ...this.languages.filter(l => l.id !== language.id)]
-      : this.languages;
+      ? [language, ...this.dictionaries.filter(l => l.id !== language.id)]
+      : this.dictionaries;
     return options.sort((a, b) => a.name.localeCompare(b.name));
   }
 
@@ -124,13 +171,13 @@ class LanguageManager {
    * select the language by the identifier
    */
   getLanguageByIdentifier(identifier: string): IDictionary | undefined {
-    const exactMatch = this.languages.find(l => l.id === identifier);
+    const exactMatch = this.dictionaries.find(l => l.id === identifier);
     if (exactMatch) {
       return exactMatch;
     }
     // approximate matches support transition from the 0.5 version (and older)
     // that used incorrect codes as language identifiers
-    const approximateMatch = this.languages.find(
+    const approximateMatch = this.dictionaries.find(
       l => l.id.toLowerCase() === identifier.replace('-', '_').toLowerCase()
     );
     if (approximateMatch) {
@@ -189,7 +236,7 @@ class SpellChecker {
     protected status_bar?: IStatusBar | null
   ) {
     // use the language_manager
-    this.language_manager = new LanguageManager();
+    this.language_manager = new LanguageManager(setting_registry);
     this._trans = translator.load('jupyterlab-spellchecker');
 
     this.status_msg = this._trans.__('Dictionary not loaded');
@@ -578,7 +625,10 @@ class SpellChecker {
     const choiceStrings = choices.map(
       // note: two dictionaries may exist for a language with the same name,
       // so we append the actual id of the dictionary in the square brackets.
-      dictionary => dictionary.name + ' [' + dictionary.id + ']'
+      dictionary =>
+        dictionary.isOnline
+          ? this._trans.__('%1 [%2] (online)', dictionary.name, dictionary.id)
+          : this._trans.__('%1 [%2]', dictionary.name, dictionary.id)
     );
 
     InputDialog.getItem({

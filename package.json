@@ -67,6 +67,7 @@
   "devDependencies": {
     "@jupyterlab/builder": "^3.0.0",
     "@jupyterlab/translation": "^3.0.0",
+    "@lumino/coreutils": "^1.8.0",
     "@typescript-eslint/eslint-plugin": "^4.8.1",
     "@typescript-eslint/parser": "^4.8.1",
     "eslint": "^7.14.0",
