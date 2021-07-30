@@ -1,3 +1,10 @@
+### 0.7.0 (2021-07-31)
+- added possibility of using remote "online" dictionaries by specifying URLs for `.aff` and `.dic` files (#85)
+- added support for translations of the text shown in the interface (#84)
+- fixed the behaviour of the dictionary selector when an invalid dictionary is initially set in the settings (#83)
+- bumped normalize-uri to 4.5.1 (#82)
+- enable strict null checks, switch to modern compilation targets; add more Jupyter projects to spellcheck ignore (#86)
+
 ### 0.6.0 (2021-06-01)
 - change the dictionary loading mechanism from internal static into a server extension (#69)
   - dictionaries will now be discovered in operating system specific paths if available
