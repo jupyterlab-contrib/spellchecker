@@ -91,7 +91,9 @@ setup_args = dict(
         "Programming Language :: Python :: 3.9",
         "Framework :: Jupyter",
         "Framework :: Jupyter :: JupyterLab",
-        "Framework :: Jupyter :: JupyterLab :: Extensions"
+        "Framework :: Jupyter :: JupyterLab :: 3",
+        "Framework :: Jupyter :: JupyterLab :: Extensions",
+        "Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt"
     ],
 )
 
