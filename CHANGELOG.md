@@ -1,3 +1,10 @@
+### 0.7.1 (2021-09-01)
+- bump tar from 6.1.5 to 6.1.11 (#92)
+- bump url-parse from 1.5.1 to 1.5.3 (#91)
+- bump path-parse from 1.0.6 to 1.0.7 (#90)
+- add new trove classifiers (#89)
+- bump tar from 6.1.0 to 6.1.5 (#88)
+
 ### 0.7.0 (2021-07-31)
 - added possibility of using remote "online" dictionaries by specifying URLs for `.aff` and `.dic` files (#85)
 - added support for translations of the text shown in the interface (#84)
