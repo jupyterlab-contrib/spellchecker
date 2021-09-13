@@ -1,4 +1,6 @@
 # jupyterlab-spellchecker
+
+[![Extension status](https://img.shields.io/badge/status-ready-success "ready to be used")](https://jupyterlab-contrib.github.io/)
 [![Github Actions Status](https://github.com/jupyterlab-contrib/spellchecker/workflows/Build/badge.svg)](https://github.com/jupyterlab-contrib/spellchecker/actions)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab-contrib/spellchecker/master?urlpath=lab)
 [![PyPI version](https://img.shields.io/pypi/v/jupyterlab-spellchecker.svg)](https://pypi.org/project/jupyterlab-spellchecker/)
