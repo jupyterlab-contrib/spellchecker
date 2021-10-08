@@ -1,5 +1,6 @@
 ### 0.7.2 (2021-10-08)
 - fallback to `base_name` if babel crashes (#95)
+- bump ansi-regex from 5.0.0 to 5.0.1 (#97)
 
 ### 0.7.1 (2021-09-01)
 - bump tar from 6.1.5 to 6.1.11 (#92)
