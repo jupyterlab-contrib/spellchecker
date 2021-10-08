@@ -1,3 +1,6 @@
+### 0.7.2 (2021-10-08)
+- fallback to `base_name` if babel crashes (#95)
+
 ### 0.7.1 (2021-09-01)
 - bump tar from 6.1.5 to 6.1.11 (#92)
 - bump url-parse from 1.5.1 to 1.5.3 (#91)
