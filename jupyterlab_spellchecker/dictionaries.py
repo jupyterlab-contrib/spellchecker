@@ -99,6 +99,12 @@ def _scan_for_dictionaries(data_path, log: logging.Logger):
                 f" {code} is not a known locale in the installed version of babel."
             )
             display_name = base_name
+        except Exception as e:
+            log.warning(
+                f"Could not obtain language name for {identifier} dictionary from {path}:"
+                f" {code} crashed babel: {e}."
+            )
+            display_name = base_name
 
         languages.append({
             'path': path,
