@@ -69,7 +69,7 @@
       "title": "Words to be ignored by the spellchecker",
       "description": "Case-sensitive list of words to be ignored",
       "$ref": "#/definitions/ignore",
-      "default": ["JupyterLab", "Jupyter", "JupyterHub", "Voilà", "Xeus"]
+      "default": ["JupyterLab", "Jupyter", "JupyterHub", "Voilà", "Xeus", "IPython"]
     },
     "mimeTypes": {
       "title": "MIME types for files/editors for which the spellchecking should be activated",
