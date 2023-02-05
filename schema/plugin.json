@@ -77,7 +77,8 @@
       "$ref": "#/definitions/mimeTypes",
       "default": [
         "text/plain",
-        "text/x-ipythongfm"
+        "text/x-ipythongfm",
+        "text/x-rst"
       ]
     },
     "onlineDictionaries": {
