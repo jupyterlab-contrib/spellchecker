@@ -78,7 +78,8 @@
       "default": [
         "text/plain",
         "text/x-ipythongfm",
-        "text/x-rst"
+        "text/x-rst",
+        "text/x-latex"
       ]
     },
     "onlineDictionaries": {
