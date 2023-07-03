@@ -61,6 +61,16 @@
       "$ref": "#/definitions/language",
       "default": "en-us"
     },
+    "checkComments": {
+      "type": "boolean",
+      "default": true,
+      "title": "Check spelling in comments"
+    },
+    "checkStrings": {
+      "type": "boolean",
+      "default": false,
+      "title": "Check spelling in strings"
+    },
     "ignore": {
       "title": "Words to be ignored by the spellchecker",
       "description": "Case-sensitive list of words to be ignored",

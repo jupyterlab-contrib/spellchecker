@@ -283,8 +283,10 @@ class SpellChecker {
               return [];
             }
 
-            const checkComments = true;
-            const checkStrings = true;
+            const checkComments =
+              this.settings?.composite?.checkComments || true;
+            const checkStrings =
+              this.settings?.composite?.checkStrings || false;
             const diagnostics: Diagnostic[] = [];
 
             let tree = ensureSyntaxTree(view.state, view.state.doc.length);
