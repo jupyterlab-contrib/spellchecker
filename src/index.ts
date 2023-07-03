@@ -2,9 +2,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { ensureSyntaxTree, syntaxTree } from '@codemirror/language';
-import { INotebookTracker } from '@jupyterlab/notebook';
 import { LabIcon } from '@jupyterlab/ui-components';
 import {
   ICommandPalette,
@@ -237,8 +235,6 @@ class SpellChecker {
 
   constructor(
     protected app: JupyterFrontEnd,
-    protected tracker: INotebookTracker,
-    protected editorTracker: IEditorTracker,
     protected settingRegistry: ISettingRegistry,
     protected editorExtensionRegistry: IEditorExtensionRegistry,
     translator: ITranslator,
@@ -688,8 +684,6 @@ class SpellChecker {
  */
 function activate(
   app: JupyterFrontEnd,
-  tracker: INotebookTracker,
-  editorTracker: IEditorTracker,
   settingRegistry: ISettingRegistry,
   editorExtensionRegistry: IEditorExtensionRegistry,
   translator: ITranslator | null,
@@ -699,8 +693,6 @@ function activate(
   console.log('Attempting to load spellchecker');
   const sp = new SpellChecker(
     app,
-    tracker,
-    editorTracker,
     settingRegistry,
     editorExtensionRegistry,
     translator || nullTranslator,
@@ -716,12 +708,7 @@ function activate(
 const extension: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab-contrib/spellchecker:plugin',
   autoStart: true,
-  requires: [
-    INotebookTracker,
-    IEditorTracker,
-    ISettingRegistry,
-    IEditorExtensionRegistry
-  ],
+  requires: [ISettingRegistry, IEditorExtensionRegistry],
   optional: [ITranslator, ICommandPalette, IStatusBar],
   activate: activate
 };
