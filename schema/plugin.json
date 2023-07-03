@@ -45,11 +45,7 @@
     },
     "theme": {
       "type": "string",
-      "enum": [
-        "background-box",
-        "wavy-underline",
-        "dotted-underline"
-      ]
+      "enum": ["background-box", "wavy-underline", "dotted-underline"]
     }
   },
   "properties": {
@@ -69,7 +65,14 @@
       "title": "Words to be ignored by the spellchecker",
       "description": "Case-sensitive list of words to be ignored",
       "$ref": "#/definitions/ignore",
-      "default": ["JupyterLab", "Jupyter", "JupyterHub", "Voilà", "Xeus", "IPython"]
+      "default": [
+        "JupyterLab",
+        "Jupyter",
+        "JupyterHub",
+        "Voilà",
+        "Xeus",
+        "IPython"
+      ]
     },
     "mimeTypes": {
       "title": "MIME types for files/editors for which the spellchecking should be activated",
@@ -79,7 +82,9 @@
         "text/plain",
         "text/x-ipythongfm",
         "text/x-rst",
-        "text/x-latex"
+        "text/x-latex",
+        "text/x-ipython",
+        "text/x-rsrc"
       ]
     },
     "onlineDictionaries": {

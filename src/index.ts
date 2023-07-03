@@ -2,7 +2,8 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
+import { IEditorTracker } from '@jupyterlab/fileeditor';
+import { ensureSyntaxTree, syntaxTree } from '@codemirror/language';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { LabIcon } from '@jupyterlab/ui-components';
 import {
@@ -14,15 +15,15 @@ import { Menu } from '@lumino/widgets';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
-import { Cell } from '@jupyterlab/cells';
-import { CodeMirrorEditor, ICodeMirror } from '@jupyterlab/codemirror';
+import {
+  IEditorExtensionRegistry,
+  EditorExtensionRegistry
+} from '@jupyterlab/codemirror';
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-
-import CodeMirror from 'codemirror';
 
 import { requestAPI } from './handler';
 
@@ -33,6 +34,15 @@ export const spellcheckIcon = new LabIcon({
   name: 'spellcheck:spellcheck',
   svgstr: spellcheckSvg
 });
+import { linter, Diagnostic } from '@codemirror/lint';
+import { EditorView } from '@codemirror/view';
+import {
+  SelectionRange,
+  StateField,
+  StateEffect,
+  StateEffectType
+} from '@codemirror/state';
+import { IterMode } from '@lezer/common';
 
 declare function require(name: string): any;
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -47,15 +57,13 @@ const enum CommandIDs {
 }
 
 interface IWord {
-  line: number;
-  start: number;
-  end: number;
+  range: SelectionRange;
   text: string;
 }
 
 interface IContext {
-  editor: CodeMirror.Editor;
-  position: CodeMirror.Position;
+  editorView: EditorView;
+  offset: number;
 }
 
 /**
@@ -97,8 +105,8 @@ interface ILanguageManagerResponse {
 }
 
 class LanguageManager {
-  protected serverDictionaries: IDictionary[];
-  protected onlineDictionaries: IDictionary[];
+  protected serverDictionaries: IDictionary[] = [];
+  protected onlineDictionaries: IDictionary[] = [];
 
   public ready: Promise<any>;
 
@@ -207,7 +215,7 @@ class StatusWidget extends ReactWidget {
  */
 class SpellChecker {
   dictionary: any;
-  suggestions_menu: Menu;
+  suggestions_menu: Menu | null = null;
   status_widget: StatusWidget;
   status_msg: string;
 
@@ -218,25 +226,27 @@ class SpellChecker {
   rx_word_char = /[^-[\]{}():/!;&@$£%§<>"*+=?.,~\\^|_`#±\s\t]/;
   rx_non_word_char = /[-[\]{}():/!;&@$£%§<>"*+=?.,~\\^|_`#±\s\t]/;
   ignored_tokens: Set<string> = new Set();
-  settings: ISettingRegistry.ISettings;
-  accepted_types: string[];
+  settings: ISettingRegistry.ISettings | null = null;
+  accepted_types: string[] = [];
   private _trans: TranslationBundle;
   readonly TEXT_SUGGESTIONS_AVAILABLE: string;
   readonly TEXT_NO_SUGGESTIONS: string;
   readonly PALETTE_CATEGORY: string;
+  private _invalidate: StateEffectType<void>;
+  private _invalidationCounter: StateField<number>;
 
   constructor(
     protected app: JupyterFrontEnd,
     protected tracker: INotebookTracker,
-    protected editor_tracker: IEditorTracker,
-    protected setting_registry: ISettingRegistry,
-    protected code_mirror: ICodeMirror,
+    protected editorTracker: IEditorTracker,
+    protected settingRegistry: ISettingRegistry,
+    protected editorExtensionRegistry: IEditorExtensionRegistry,
     translator: ITranslator,
     protected palette?: ICommandPalette | null,
-    protected status_bar?: IStatusBar | null
+    protected statusBar?: IStatusBar | null
   ) {
     // use the language_manager
-    this.language_manager = new LanguageManager(setting_registry);
+    this.language_manager = new LanguageManager(settingRegistry);
     this._trans = translator.load('jupyterlab-spellchecker');
 
     this.status_msg = this._trans.__('Dictionary not loaded');
@@ -250,22 +260,111 @@ class SpellChecker {
     // setup the static content of the spellchecker UI
     this.setup_button();
     this.setup_suggestions();
+    this.status_widget = new StatusWidget(() => this.status_msg);
     this.setup_language_picker();
     this.setup_ignore_action();
-
-    this.tracker.activeCellChanged.connect(() => {
-      if (this.tracker.activeCell) {
-        this.setup_cell_editor(this.tracker.activeCell);
+    this._invalidate = StateEffect.define<void>();
+    this._invalidationCounter = StateField.define<number>({
+      create: () => 0,
+      update: (value, tr) => {
+        for (const e of tr.effects) {
+          if (e.is(this._invalidate)) {
+            value += 1;
+          }
+        }
+        return value;
       }
     });
-    // setup newly open editors
-    this.editor_tracker.widgetAdded.connect((sender, widget) =>
-      this.setup_file_editor(widget.content, true)
-    );
-    // refresh already open editors when activated (because the MIME type might have changed)
-    this.editor_tracker.currentChanged.connect((sender, widget) => {
-      if (widget !== null) {
-        this.setup_file_editor(widget.content, false);
+
+    this.editorExtensionRegistry.addExtension({
+      name: 'spellchecker',
+      factory: options => {
+        const spellchecker = linter(
+          (view: EditorView) => {
+            const check = this.accepted_types.includes(options.model.mimeType);
+
+            if (!check) {
+              return [];
+            }
+
+            const checkComments = true;
+            const checkStrings = true;
+            const diagnostics: Diagnostic[] = [];
+
+            let tree = ensureSyntaxTree(view.state, view.state.doc.length);
+            if (!tree) {
+              tree = syntaxTree(view.state);
+            }
+
+            const content = [...view.state.sliceDoc(0, view.state.doc.length)];
+
+            tree.iterate({
+              mode: IterMode.IncludeAnonymous,
+              enter: node => {
+                const isLeaf = node.node.firstChild === null;
+
+                if (isLeaf) {
+                  const nodeType = node.name.toLowerCase();
+                  if (
+                    (checkComments && nodeType === 'comment') ||
+                    (checkStrings && nodeType === 'string') ||
+                    nodeType === 'paragraph'
+                  ) {
+                    // do not mask these
+                    return false;
+                  }
+                  // mask everything else
+                  for (let i = node.from; i < node.to; i++) {
+                    content[i] = ' ';
+                  }
+                }
+
+                return true;
+              }
+            });
+
+            for (const match of content.join('').matchAll(/(\w)+/g)) {
+              const word = match[0];
+              if (
+                word !== '' &&
+                !word.match(/^\d+$/) &&
+                this.dictionary !== undefined &&
+                !this.dictionary.check(word) &&
+                !this.ignored_tokens.has(word)
+              ) {
+                diagnostics.push({
+                  from: match.index!,
+                  to: match.index! + word.length,
+                  severity: 'spell' as any,
+                  message: ''
+                  // Using "actions" could provide nicer UX for replacing the
+                  // misspelt word with one of suggestions; the challenge is
+                  // in making it only search for suggestions when tooltip
+                  // gets open to avoid performance penalty.
+                });
+              }
+            }
+
+            return diagnostics;
+          },
+          {
+            delay: 250,
+            // disable tooltips (default positioning is off)
+            tooltipFilter: () => [],
+            needsRefresh: update => {
+              const previous = update.startState.field(
+                this._invalidationCounter
+              );
+              const current = update.state.field(this._invalidationCounter);
+              return previous !== current;
+            }
+          }
+        );
+
+        return EditorExtensionRegistry.createImmutableExtension([
+          spellchecker,
+          this._invalidationCounter
+        ]);
       }
     });
   }
@@ -274,7 +373,7 @@ class SpellChecker {
   // we know that the values are set correctly!
   setup_settings() {
     Promise.all([
-      this.setting_registry.load(extension.id),
+      this.settingRegistry.load(extension.id),
       this.app.restored,
       this.language_manager.ready
     ])
@@ -308,59 +407,12 @@ class SpellChecker {
     if (user_language === undefined) {
       console.warn('The language ' + language_id + ' is not supported!');
     } else {
+      if (user_language === this.language) {
+        return;
+      }
       this.language = user_language;
       // load the dictionary
       this.load_dictionary().catch(console.warn);
-    }
-    this.refresh_state();
-  }
-
-  setup_file_editor(file_editor: FileEditor, setup_signal = false): void {
-    if (
-      this.accepted_types &&
-      this.accepted_types.indexOf(file_editor.model.mimeType) !== -1
-    ) {
-      const editor = this.extract_editor(file_editor);
-      this.setup_overlay(editor);
-    }
-    if (setup_signal) {
-      file_editor.model.mimeTypeChanged.connect((model, args) => {
-        // putting at the end of execution queue to allow the CodeMirror mode to be updated
-        setTimeout(() => this.setup_file_editor(file_editor), 0);
-      });
-    }
-  }
-
-  setup_cell_editor(cell: Cell): void {
-    if (cell !== null && cell.model.type === 'markdown') {
-      const editor = this.extract_editor(cell);
-      this.setup_overlay(editor);
-    }
-  }
-
-  extract_editor(cell_or_editor: Cell | FileEditor): CodeMirror.Editor {
-    const editor_temp = cell_or_editor.editor as CodeMirrorEditor;
-    return editor_temp.editor;
-  }
-
-  setup_overlay(editor: CodeMirror.Editor, retry = true): void {
-    const current_mode = editor.getOption('mode') as string;
-
-    if (current_mode === 'null') {
-      if (retry) {
-        // putting at the end of execution queue to allow the CodeMirror mode to be updated
-        setTimeout(() => this.setup_overlay(editor, false), 0);
-      }
-      return;
-    }
-
-    if (this.check_spelling) {
-      editor.setOption('mode', this.define_mode(current_mode));
-    } else {
-      const original_mode = current_mode.match(/^spellcheck_/)
-        ? current_mode.substr(11)
-        : current_mode;
-      editor.setOption('mode', original_mode);
     }
   }
 
@@ -389,19 +441,23 @@ class SpellChecker {
     // @ts-ignore
     const event = this.app._contextMenuEvent as MouseEvent;
     const target = event.target as HTMLElement;
-    const code_mirror_wrapper: any = target.closest('.CodeMirror');
+    const code_mirror_wrapper: any = target.closest('.cm-content');
     if (code_mirror_wrapper === null) {
       return null;
     }
-    const code_mirror = code_mirror_wrapper.CodeMirror as CodeMirror.Editor;
-    const position = code_mirror.coordsChar({
-      left: event.clientX,
-      top: event.clientY
+    const editorView = code_mirror_wrapper.cmView.view as EditorView;
+    const offset = editorView.posAtCoords({
+      x: event.clientX,
+      y: event.clientY
     });
 
+    if (!offset) {
+      return null;
+    }
+
     return {
-      editor: code_mirror,
-      position: position
+      editorView,
+      offset
     };
   }
 
@@ -411,21 +467,11 @@ class SpellChecker {
    * (each letter outside of markdown features is a separate token!)
    */
   get_current_word(context: IContext): IWord {
-    const { editor, position } = context;
-    const line = editor.getDoc().getLine(position.line);
-    let start = position.ch;
-    while (start > 0 && line[start].match(this.rx_word_char)) {
-      start--;
-    }
-    let end = position.ch;
-    while (end < line.length && line[end].match(this.rx_word_char)) {
-      end++;
-    }
+    const { editorView, offset } = context;
+    const range = editorView.state.wordAt(offset)!;
     return {
-      line: position.line,
-      start: start,
-      end: end,
-      text: line.substring(start, end)
+      range,
+      text: editorView.state.sliceDoc(range.from, range.to)
     };
   }
 
@@ -447,13 +493,13 @@ class SpellChecker {
       }
     });
     this.app.contextMenu.addItem({
-      selector: '.cm-spell-error',
+      selector: '.cm-lintRange-spell',
       command: CommandIDs.updateSuggestions
     });
     // end of the menu trigger detection hack
 
     this.app.contextMenu.addItem({
-      selector: '.cm-spell-error',
+      selector: '.cm-lintRange-spell',
       submenu: this.suggestions_menu,
       type: 'submenu'
     });
@@ -474,12 +520,12 @@ class SpellChecker {
     });
 
     this.app.contextMenu.addItem({
-      selector: '.cm-spell-error',
+      selector: '.cm-lintRange-spell',
       command: CommandIDs.ignoreWord
     });
   }
 
-  ignore() {
+  async ignore() {
     const context = this.get_contextmenu_context();
 
     if (context === null) {
@@ -488,12 +534,15 @@ class SpellChecker {
       );
     } else {
       const word = this.get_current_word(context);
-      this.settings
-        .set('ignore', [
-          word.text.trim(),
-          ...(this.settings.get('ignore').composite as Array<string>)
-        ])
-        .catch(console.warn);
+      await this.settings!.set('ignore', [
+        word.text.trim(),
+        ...(this.settings!.get('ignore').composite as Array<string>)
+      ]);
+      this.load_dictionary();
+      // force refresh editor to remove underline for now ignored word
+      context.editorView.dispatch({
+        effects: this._invalidate.of()
+      });
     }
   }
 
@@ -508,22 +557,26 @@ class SpellChecker {
       const word = this.get_current_word(context);
       suggestions = this.dictionary.suggest(word.text);
     }
-    this.suggestions_menu.clearItems();
+    const suggestions_menu = this.suggestions_menu;
+    if (suggestions_menu === null) {
+      throw Error('Suggestions menu not assigned');
+    }
+    suggestions_menu.clearItems();
 
     if (suggestions.length) {
       for (const suggestion of suggestions) {
-        this.suggestions_menu.addItem({
+        suggestions_menu.addItem({
           command: CommandIDs.applySuggestion,
           args: { name: suggestion }
         });
       }
-      this.suggestions_menu.title.label = this.TEXT_SUGGESTIONS_AVAILABLE;
-      this.suggestions_menu.title.className = '';
-      this.suggestions_menu.setHidden(false);
+      suggestions_menu.title.label = this.TEXT_SUGGESTIONS_AVAILABLE;
+      suggestions_menu.title.className = '';
+      suggestions_menu.setHidden(false);
     } else {
-      this.suggestions_menu.title.className = 'lm-mod-disabled';
-      this.suggestions_menu.title.label = this.TEXT_NO_SUGGESTIONS;
-      this.suggestions_menu.setHidden(true);
+      suggestions_menu.title.className = 'lm-mod-disabled';
+      suggestions_menu.title.label = this.TEXT_NO_SUGGESTIONS;
+      suggestions_menu.setHidden(true);
     }
   }
 
@@ -536,18 +589,17 @@ class SpellChecker {
       return;
     }
     const word = this.get_current_word(context);
+    const view = context.editorView;
 
-    context.editor.getDoc().replaceRange(
-      replacement,
-      {
-        ch: word.start,
-        line: word.line
-      },
-      {
-        ch: word.end,
-        line: word.line
-      }
-    );
+    view.dispatch({
+      changes: [
+        {
+          from: word.range.from,
+          to: word.range.to,
+          insert: replacement
+        }
+      ]
+    });
   }
 
   load_dictionary() {
@@ -569,54 +621,7 @@ class SpellChecker {
       this.status_msg = language.name;
       // update the complete UI
       this.status_widget.update();
-      this.refresh_state();
     });
-  }
-
-  define_mode = (original_mode_spec: string) => {
-    if (original_mode_spec.indexOf('spellcheck_') === 0) {
-      return original_mode_spec;
-    }
-    const new_mode_spec = 'spellcheck_' + original_mode_spec;
-    this.code_mirror.CodeMirror.defineMode(new_mode_spec, (config: any) => {
-      const spellchecker_overlay = {
-        name: new_mode_spec,
-        token: (stream: any, state: any) => {
-          if (stream.eatWhile(this.rx_word_char)) {
-            const word = stream.current().replace(/(^')|('$)/g, '');
-            if (
-              word !== '' &&
-              !word.match(/^\d+$/) &&
-              this.dictionary !== undefined &&
-              !this.dictionary.check(word) &&
-              !this.ignored_tokens.has(word)
-            ) {
-              return 'spell-error';
-            }
-          }
-          stream.eatWhile(this.rx_non_word_char);
-          return null;
-        }
-      };
-      return this.code_mirror.CodeMirror.overlayMode(
-        this.code_mirror.CodeMirror.getMode(config, original_mode_spec),
-        spellchecker_overlay,
-        true
-      );
-    });
-    return new_mode_spec;
-  };
-
-  refresh_state() {
-    // update the active cell (if any)
-    if (this.tracker.activeCell !== null) {
-      this.setup_cell_editor(this.tracker.activeCell);
-    }
-
-    // update the current file editor (if any)
-    if (this.editor_tracker.currentWidget !== null) {
-      this.setup_file_editor(this.editor_tracker.currentWidget.content);
-    }
   }
 
   choose_language() {
@@ -648,13 +653,12 @@ class SpellChecker {
         }
         this.language = lang;
         // the setup routine will load the dictionary
-        this.settings.set('language', this.language.id).catch(console.warn);
+        this.settings!.set('language', this.language.id).catch(console.warn);
       }
     });
   }
 
   setup_language_picker() {
-    this.status_widget = new StatusWidget(() => this.status_msg);
     this.status_widget.node.onclick = () => {
       this.choose_language();
     };
@@ -670,8 +674,8 @@ class SpellChecker {
       });
     }
 
-    if (this.status_bar) {
-      this.status_bar.registerStatusItem('spellchecker:choose-language', {
+    if (this.statusBar) {
+      this.statusBar.registerStatusItem('spellchecker:choose-language', {
         align: 'right',
         item: this.status_widget
       });
@@ -685,34 +689,39 @@ class SpellChecker {
 function activate(
   app: JupyterFrontEnd,
   tracker: INotebookTracker,
-  editor_tracker: IEditorTracker,
-  setting_registry: ISettingRegistry,
-  code_mirror: ICodeMirror,
+  editorTracker: IEditorTracker,
+  settingRegistry: ISettingRegistry,
+  editorExtensionRegistry: IEditorExtensionRegistry,
   translator: ITranslator | null,
   palette: ICommandPalette | null,
-  status_bar: IStatusBar | null
+  statusBar: IStatusBar | null
 ): void {
   console.log('Attempting to load spellchecker');
   const sp = new SpellChecker(
     app,
     tracker,
-    editor_tracker,
-    setting_registry,
-    code_mirror,
+    editorTracker,
+    settingRegistry,
+    editorExtensionRegistry,
     translator || nullTranslator,
     palette,
-    status_bar
+    statusBar
   );
-  console.log('Spellchecker Loaded ', sp);
+  console.log('Spellchecker loaded ', sp);
 }
 
 /**
  * Initialization data for the jupyterlab_spellchecker extension.
  */
 const extension: JupyterFrontEndPlugin<void> = {
-  id: '@ijmbarr/jupyterlab_spellchecker:plugin',
+  id: '@jupyterlab-contrib/spellchecker:plugin',
   autoStart: true,
-  requires: [INotebookTracker, IEditorTracker, ISettingRegistry, ICodeMirror],
+  requires: [
+    INotebookTracker,
+    IEditorTracker,
+    ISettingRegistry,
+    IEditorExtensionRegistry
+  ],
   optional: [ITranslator, ICommandPalette, IStatusBar],
   activate: activate
 };
