@@ -1,3 +1,7 @@
+### 0.8.2 (2023-06-04)
+
+- fix server extension loading (#131)
+
 ### 0.8.1 (2023-06-04)
 
 - fix for PyPI upload (#130)
