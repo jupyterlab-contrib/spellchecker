@@ -1,34 +1,39 @@
-body[data-jp-spellchecker-theme='background-box'] .CodeMirror .cm-spell-error:not(.cm-url):not(.cm-tag):not(.cm-word) {
-  background: rgba(255, 0, 0, .15);
+body[data-jp-spellchecker-theme='background-box'] .cm-lintRange-spell {
+  background: rgb(255 0 0 / 15%);
 }
 
-body[data-jp-spellchecker-theme='background-box'][data-jp-theme-light='false'] .CodeMirror .cm-spell-error:not(.cm-url):not(.cm-tag):not(.cm-word) {
-  background: rgba(255, 0, 0, .35);
+body[data-jp-spellchecker-theme='background-box'][data-jp-theme-light='false']
+  .cm-lintRange-spell {
+  background: rgb(255 0 0 / 35%);
   text-shadow: 0 0 5px black;
 }
 
-body[data-jp-spellchecker-theme='wavy-underline'] .CodeMirror .cm-spell-error:not(.cm-url):not(.cm-tag):not(.cm-word) {
+body[data-jp-spellchecker-theme='wavy-underline'] .cm-lintRange-spell {
   text-decoration-line: underline;
   text-decoration-style: wavy;
   text-decoration-color: red;
+
   /* For Chrome */
   text-decoration-skip-ink: none;
 }
 
-body[data-jp-spellchecker-theme='wavy-underline'][data-jp-theme-light='false'] .CodeMirror .cm-spell-error:not(.cm-url):not(.cm-tag):not(.cm-word) {
+body[data-jp-spellchecker-theme='wavy-underline'][data-jp-theme-light='false']
+  .cm-lintRange-spell {
   /* Use bright red for dark themes */
   text-decoration-color: #ff5722;
 }
 
-body[data-jp-spellchecker-theme='dotted-underline'] .CodeMirror .cm-spell-error:not(.cm-url):not(.cm-tag):not(.cm-word) {
+body[data-jp-spellchecker-theme='dotted-underline'] .cm-lintRange-spell {
   text-decoration-line: underline;
   text-decoration-style: dotted;
   text-decoration-color: red;
+
   /* For Chrome */
   text-decoration-skip-ink: none;
 }
 
-body[data-jp-spellchecker-theme='dotted-underline'][data-jp-theme-light='false'] .CodeMirror .cm-spell-error:not(.cm-url):not(.cm-tag):not(.cm-word) {
+body[data-jp-spellchecker-theme='dotted-underline'][data-jp-theme-light='false']
+  .cm-lintRange-spell {
   /* Use bright red for dark themes */
-    text-decoration-color: #ff5722;
+  text-decoration-color: #ff5722;
 }

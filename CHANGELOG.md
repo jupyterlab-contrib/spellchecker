@@ -1,8 +1,20 @@
+### 0.8.0 (2023-06-04)
+
+- support JupyterLab 4.0 (#128)
+
+### 0.7.3 (2023-02-08)
+
+- enable spellchecker by default in RST and LaTeX files (#122)
+- add IPython to ignore list (#123)
+- bump version and builder dev dependency (#124)
+
 ### 0.7.2 (2021-10-08)
+
 - fallback to `base_name` if babel crashes (#95)
 - bump ansi-regex from 5.0.0 to 5.0.1 (#97)
 
 ### 0.7.1 (2021-09-01)
+
 - bump tar from 6.1.5 to 6.1.11 (#92)
 - bump url-parse from 1.5.1 to 1.5.3 (#91)
 - bump path-parse from 1.0.6 to 1.0.7 (#90)
@@ -10,6 +22,7 @@
 - bump tar from 6.1.0 to 6.1.5 (#88)
 
 ### 0.7.0 (2021-07-31)
+
 - added possibility of using remote "online" dictionaries by specifying URLs for `.aff` and `.dic` files (#85)
 - added support for translations of the text shown in the interface (#84)
 - fixed the behaviour of the dictionary selector when an invalid dictionary is initially set in the settings (#83)
@@ -17,12 +30,14 @@
 - enable strict null checks, switch to modern compilation targets; add more Jupyter projects to spellcheck ignore (#86)
 
 ### 0.6.0 (2021-06-01)
+
 - change the dictionary loading mechanism from internal static into a server extension (#69)
   - dictionaries will now be discovered in operating system specific paths if available
   - choice is now possible from one of multiple dictionaries using the same locale
 - add the possibility to add custom dictionary (#66)
 
 ### 0.5.2 (2021-03-19)
+
 - added a status message while loading a dictionary (#62)
 
 ### 0.5.0 (2021-02-28)
