@@ -289,7 +289,7 @@ class SpellChecker {
             const check = this.accepted_types.includes(options.model.mimeType);
             this._latestMimeType = options.model.mimeType;
 
-            if (this._active != check) {
+            if (this._active !== check) {
               this._active = check;
               this.status_widget.update();
             }
@@ -298,7 +298,7 @@ class SpellChecker {
               return [];
             }
 
-            const isPlain = options.model.mimeType == 'text/plain';
+            const isPlain = options.model.mimeType === 'text/plain';
             const checkComments =
               this.settings?.composite?.checkComments || true;
             const checkStrings =
@@ -323,7 +323,8 @@ class SpellChecker {
                     (checkComments && nodeType === 'comment') ||
                     (checkStrings && nodeType === 'string') ||
                     (isPlain && nodeType === '⚠') ||
-                    nodeType === 'paragraph'
+                    nodeType === 'paragraph' ||
+                    nodeType === 'document' // required for LaTeX
                   ) {
                     // do not mask these
                     return false;
@@ -701,7 +702,7 @@ class SpellChecker {
   setup_language_picker() {
     this.status_widget.node.onclick = () => {
       if (!this._active && this._latestMimeType) {
-        return this.maybeEnableSpelling(this._latestMimeType).then();
+        return this.maybeEnableSpelling(this._latestMimeType);
       }
       this.choose_language();
     };
