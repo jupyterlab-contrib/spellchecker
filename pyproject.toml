@@ -26,10 +26,6 @@ dependencies = [
 ]
 dynamic = ["version", "description", "authors", "urls", "keywords"]
 
-[project.urls]
-Source = "https://github.com/jupyterlab-contrib/spellchecker"
-Issues = "https://github.com/jupyterlab-contrib/spellchecker/issues"
-
 [tool.hatch.version]
 source = "nodejs"
 
