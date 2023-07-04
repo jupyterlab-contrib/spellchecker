@@ -340,7 +340,7 @@ class SpellChecker {
             });
 
             for (const match of content.join('').matchAll(this.wordRegex)) {
-              const word = match[0];
+              const word = match[0].replace(/(^')|('$)/g, '');
               if (
                 word !== '' &&
                 !word.match(/^\d+$/) &&
