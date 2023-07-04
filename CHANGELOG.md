@@ -1,3 +1,13 @@
+### 0.8.0 (2023-06-04)
+
+- support JupyterLab 4.0 (#128)
+
+### 0.7.3 (2023-02-08)
+
+- enable spellchecker by default in RST and LaTeX files (#122)
+- add IPython to ignore list (#123)
+- bump version and builder dev dependency (#124)
+
 ### 0.7.2 (2021-10-08)
 
 - fallback to `base_name` if babel crashes (#95)
