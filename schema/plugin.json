@@ -71,6 +71,11 @@
       "default": false,
       "title": "Check spelling in strings"
     },
+    "debounceTime": {
+      "type": "number",
+      "default": 200,
+      "title": "Time delay before spellchecking starts (debouncer)."
+    },
     "ignore": {
       "title": "Words to be ignored by the spellchecker",
       "description": "Case-sensitive list of words to be ignored",

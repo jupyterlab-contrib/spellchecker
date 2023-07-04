@@ -346,7 +346,7 @@ class SpellChecker {
             return diagnostics;
           },
           {
-            delay: 250,
+            delay: this.settings?.composite?.debounceTime as number || 200,
             // disable tooltips (default positioning is off)
             tooltipFilter: () => [],
             needsRefresh: update => {
