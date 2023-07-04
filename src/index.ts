@@ -7,6 +7,8 @@ import { LabIcon } from '@jupyterlab/ui-components';
 import {
   ICommandPalette,
   InputDialog,
+  Dialog,
+  showDialog,
   ReactWidget
 } from '@jupyterlab/apputils';
 import { Menu } from '@lumino/widgets';
@@ -231,6 +233,8 @@ class SpellChecker {
   readonly PALETTE_CATEGORY: string;
   private _invalidate: StateEffectType<void>;
   private _invalidationCounter: StateField<number>;
+  private _active = true;
+  private _latestMimeType = '';
 
   constructor(
     protected app: JupyterFrontEnd,
@@ -255,7 +259,13 @@ class SpellChecker {
     // setup the static content of the spellchecker UI
     this.setup_button();
     this.setup_suggestions();
-    this.status_widget = new StatusWidget(() => this.status_msg);
+    this.status_widget = new StatusWidget(() => {
+      if (this._active) {
+        return this.status_msg;
+      } else {
+        return this._trans.__('Spellcheck off');
+      }
+    });
     this.setup_language_picker();
     this.setup_ignore_action();
     this._invalidate = StateEffect.define<void>();
@@ -277,11 +287,18 @@ class SpellChecker {
         const spellchecker = linter(
           (view: EditorView) => {
             const check = this.accepted_types.includes(options.model.mimeType);
+            this._latestMimeType = options.model.mimeType;
+
+            if (this._active != check) {
+              this._active = check;
+              this.status_widget.update();
+            }
 
             if (!check) {
               return [];
             }
 
+            const isPlain = options.model.mimeType == 'text/plain';
             const checkComments =
               this.settings?.composite?.checkComments || true;
             const checkStrings =
@@ -305,6 +322,7 @@ class SpellChecker {
                   if (
                     (checkComments && nodeType === 'comment') ||
                     (checkStrings && nodeType === 'string') ||
+                    (isPlain && nodeType === '⚠') ||
                     nodeType === 'paragraph'
                   ) {
                     // do not mask these
@@ -655,8 +673,36 @@ class SpellChecker {
     });
   }
 
+  async maybeEnableSpelling(mimeType: string) {
+    const response = await showDialog({
+      title: this._trans.__('Enable spellchecking in %1?', mimeType),
+      body: this._trans.__(
+        'The decision will apply to all editors with this content type.'
+      ),
+      buttons: [
+        Dialog.okButton({ label: this._trans.__('Enable') }),
+        Dialog.cancelButton()
+      ],
+      checkbox: {
+        label: this._trans.__('Remember this decision (updates settings).')
+      }
+    });
+    if (response.button.accept === true) {
+      this.accepted_types.push(mimeType);
+      if (response.isChecked) {
+        const rememberedMimeTypes = this.settings!.get('mimeTypes')
+          .composite as string[];
+        rememberedMimeTypes.push(mimeType);
+        await this.settings!.set('mimeTypes', rememberedMimeTypes);
+      }
+    }
+  }
+
   setup_language_picker() {
     this.status_widget.node.onclick = () => {
+      if (!this._active && this._latestMimeType) {
+        return this.maybeEnableSpelling(this._latestMimeType).then();
+      }
       this.choose_language();
     };
     this.app.commands.addCommand(CommandIDs.chooseLanguage, {
