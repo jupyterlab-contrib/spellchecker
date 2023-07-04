@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab-contrib/spellchecker",
-  "version": "0.8.0",
+  "version": "0.8.2",
   "description": "A spell checker for JupyterLab.",
   "keywords": [
     "jupyter",
