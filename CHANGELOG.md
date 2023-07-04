@@ -1,6 +1,12 @@
+### 0.8.1 (2023-06-04)
+
+- fix for PyPI upload (#130)
+
 ### 0.8.0 (2023-06-04)
 
 - support JupyterLab 4.0 (#128)
+- support optional spellchecking in comments and strings
+- click on statusbar item to enable spellchecking
 
 ### 0.7.3 (2023-02-08)
 

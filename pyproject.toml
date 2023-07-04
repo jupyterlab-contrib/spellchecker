@@ -24,13 +24,17 @@ classifiers = [
 dependencies = [
     "jupyter_server>=2.0.1,<3"
 ]
-dynamic = ["version", "description", "authors", "urls", "keywords"]
+dynamic = ["version", "description", "authors", "keywords"]
+
+[project.urls]
+Source = "https://github.com/jupyterlab-contrib/spellchecker"
+Issues = "https://github.com/jupyterlab-contrib/spellchecker/issues"
 
 [tool.hatch.version]
 source = "nodejs"
 
 [tool.hatch.metadata.hooks.nodejs]
-fields = ["description", "authors", "urls"]
+fields = ["description", "authors"]
 
 [tool.hatch.build.targets.sdist]
 artifacts = ["jupyterlab_spellchecker/labextension"]

@@ -35,11 +35,11 @@ For more details, please see the [example](#adding-dictionaries---example) below
 
 ## JupyterLab Version
 
-The extension has been tested up to JupyterLab version 3.0.
+The extension has been tested up to JupyterLab version 4.0.
 
 ## Installation
 
-For JupyterLab 3.x:
+For JupyterLab 3.x and 4.x:
 
 ```bash
 pip install jupyterlab-spellchecker
