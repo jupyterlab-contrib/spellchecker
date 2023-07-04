@@ -221,11 +221,10 @@ class SpellChecker {
   check_spelling = true;
   language: IDictionary | undefined;
   language_manager: LanguageManager;
-  rx_word_char = /[^-[\]{}():/!;&@$£%§<>"*+=?.,~\\^|_`#±\s\t]/;
-  rx_non_word_char = /[-[\]{}():/!;&@$£%§<>"*+=?.,~\\^|_`#±\s\t]/;
   ignored_tokens: Set<string> = new Set();
   settings: ISettingRegistry.ISettings | null = null;
   accepted_types: string[] = [];
+  protected wordRegex = /([^-[\]{}():/!;&@$£%§<>"*+=?.,~\\^|_`#±\s\t])+/g;
   private _trans: TranslationBundle;
   readonly TEXT_SUGGESTIONS_AVAILABLE: string;
   readonly TEXT_NO_SUGGESTIONS: string;
@@ -321,7 +320,7 @@ class SpellChecker {
               }
             });
 
-            for (const match of content.join('').matchAll(/(\w)+/g)) {
+            for (const match of content.join('').matchAll(this.wordRegex)) {
               const word = match[0];
               if (
                 word !== '' &&
@@ -346,7 +345,7 @@ class SpellChecker {
             return diagnostics;
           },
           {
-            delay: this.settings?.composite?.debounceTime as number || 200,
+            delay: (this.settings?.composite?.debounceTime as number) || 200,
             // disable tooltips (default positioning is off)
             tooltipFilter: () => [],
             needsRefresh: update => {
