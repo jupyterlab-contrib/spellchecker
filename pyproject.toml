@@ -45,6 +45,7 @@ exclude = [".github", "binder"]
 "install.json" = "share/jupyter/labextensions/@jupyterlab-contrib/spellchecker/install.json"
 "jupyter-config/server-config" = "etc/jupyter/jupyter_server_config.d"
 "jupyter-config/nb-config" = "etc/jupyter/jupyter_notebook_config.d"
+"dictionaries" = "share/jupyter/dictionaries"
 
 [tool.hatch.build.hooks.version]
 path = "jupyterlab_spellchecker/_version.py"
