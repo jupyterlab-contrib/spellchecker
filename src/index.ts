@@ -17,7 +17,8 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
 import {
   IEditorExtensionRegistry,
-  EditorExtensionRegistry
+  EditorExtensionRegistry,
+  IEditorLanguageRegistry
 } from '@jupyterlab/codemirror';
 import {
   ITranslator,
@@ -242,7 +243,8 @@ class SpellChecker {
     protected editorExtensionRegistry: IEditorExtensionRegistry,
     translator: ITranslator,
     protected palette?: ICommandPalette | null,
-    protected statusBar?: IStatusBar | null
+    protected statusBar?: IStatusBar | null,
+    protected editorLanguages?: IEditorLanguageRegistry | null
   ) {
     // use the language_manager
     this.language_manager = new LanguageManager(settingRegistry);
@@ -266,6 +268,7 @@ class SpellChecker {
         return this._trans.__('Spellcheck off');
       }
     });
+    this.status_widget.addClass('jp-mod-highlighted');
     this.setup_language_picker();
     this.setup_ignore_action();
     this._invalidate = StateEffect.define<void>();
@@ -286,13 +289,7 @@ class SpellChecker {
       factory: options => {
         const spellchecker = linter(
           (view: EditorView) => {
-            const check = this.accepted_types.includes(options.model.mimeType);
-            this._latestMimeType = options.model.mimeType;
-
-            if (this._active !== check) {
-              this._active = check;
-              this.status_widget.update();
-            }
+            const check = this._switchContentType(options.model.mimeType);
 
             if (!check) {
               return [];
@@ -377,12 +374,35 @@ class SpellChecker {
           }
         );
 
+        const focusTracker = EditorView.domEventHandlers({
+          focus: () => {
+            this._switchContentType(options.model.mimeType);
+          }
+        });
+
         return EditorExtensionRegistry.createImmutableExtension([
           spellchecker,
-          this._invalidationCounter
+          this._invalidationCounter,
+          focusTracker
         ]);
       }
     });
+  }
+
+  /**
+   * Update state to reflect spellchecker status, record MIME type in use.
+   *
+   * Returns true if spelling is enabled.
+   */
+  private _switchContentType(mimeType: string): boolean {
+    const check = this.accepted_types.includes(mimeType);
+    this._latestMimeType = mimeType;
+
+    if (this._active !== check) {
+      this._active = check;
+      this.status_widget.update();
+    }
+    return check;
   }
 
   // move the load_dictionary into the setup routine, because then
@@ -675,17 +695,30 @@ class SpellChecker {
   }
 
   async maybeEnableSpelling(mimeType: string) {
+    let language = mimeType;
+    if (this.editorLanguages) {
+      const editorLang = this.editorLanguages.findByMIME(mimeType);
+      if (editorLang) {
+        if (editorLang.displayName) {
+          language = editorLang.displayName;
+        } else {
+          language = editorLang.name;
+        }
+      }
+    }
+
     const response = await showDialog({
-      title: this._trans.__('Enable spellchecking in %1?', mimeType),
+      title: this._trans.__('Enable spellchecking in %1?', language),
       body: this._trans.__(
-        'The decision will apply to all editors with this content type.'
+        'The will apply to all editors with %1 content type.',
+        mimeType
       ),
       buttons: [
         Dialog.okButton({ label: this._trans.__('Enable') }),
         Dialog.cancelButton()
       ],
       checkbox: {
-        label: this._trans.__('Remember this decision (updates settings).')
+        label: this._trans.__('Remember this decision.')
       }
     });
     if (response.button.accept === true) {
@@ -736,18 +769,20 @@ function activate(
   editorExtensionRegistry: IEditorExtensionRegistry,
   translator: ITranslator | null,
   palette: ICommandPalette | null,
-  statusBar: IStatusBar | null
+  statusBar: IStatusBar | null,
+  editorLanguages: IEditorLanguageRegistry | null
 ): void {
-  console.log('Attempting to load spellchecker');
+  console.debug('Attempting to load spellchecker');
   const sp = new SpellChecker(
     app,
     settingRegistry,
     editorExtensionRegistry,
     translator || nullTranslator,
     palette,
-    statusBar
+    statusBar,
+    editorLanguages
   );
-  console.log('Spellchecker loaded ', sp);
+  console.debug('Spellchecker loaded ', sp);
 }
 
 /**
@@ -757,7 +792,7 @@ const extension: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab-contrib/spellchecker:plugin',
   autoStart: true,
   requires: [ISettingRegistry, IEditorExtensionRegistry],
-  optional: [ITranslator, ICommandPalette, IStatusBar],
+  optional: [ITranslator, ICommandPalette, IStatusBar, IEditorLanguageRegistry],
   activate: activate
 };
 
