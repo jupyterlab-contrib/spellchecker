@@ -317,7 +317,9 @@ class SpellChecker {
                 if (isLeaf) {
                   const nodeType = node.name.toLowerCase();
                   if (
-                    (checkComments && nodeType === 'comment') ||
+                    (checkComments &&
+                      (nodeType === 'comment' ||
+                        nodeType === 'blockcomment')) ||
                     (checkStrings && nodeType === 'string') ||
                     (isPlain && nodeType === '⚠') ||
                     nodeType === 'paragraph' ||
