@@ -1,3 +1,12 @@
+### 0.8.3 (2023-06-05)
+
+- bug fixes:
+  - fix old status persisting in status bar when switching editors (but not typing anything yet)
+  - fix dictionaries not being copied over on install
+- enhancements:
+  - spellcheck in block comments
+  - show language in the dialog for enabling spellcheck in current document
+
 ### 0.8.2 (2023-06-04)
 
 - fix server extension loading (#131)
