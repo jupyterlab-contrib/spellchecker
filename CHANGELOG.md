@@ -3,8 +3,8 @@
 - bug fixes:
   - fix old status persisting in status bar when switching editors (but not typing anything yet)
   - fix dictionaries not being copied over on install
+  - spellcheck in block comments and line comments in languages with C-like syntax
 - enhancements:
-  - spellcheck in block comments
   - show language in the dialog for enabling spellcheck in current document
 
 ### 0.8.2 (2023-06-04)

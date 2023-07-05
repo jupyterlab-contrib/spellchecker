@@ -308,6 +308,11 @@ class SpellChecker {
             }
 
             const content = [...view.state.sliceDoc(0, view.state.doc.length)];
+            const commentTypes = new Set([
+              'comment', // Python
+              'blockcomment', // C-like languages
+              'linecomment' // C-like languages
+            ]);
 
             tree.iterate({
               mode: IterMode.IncludeAnonymous,
@@ -317,9 +322,7 @@ class SpellChecker {
                 if (isLeaf) {
                   const nodeType = node.name.toLowerCase();
                   if (
-                    (checkComments &&
-                      (nodeType === 'comment' ||
-                        nodeType === 'blockcomment')) ||
+                    (checkComments && commentTypes.has(nodeType)) ||
                     (checkStrings && nodeType === 'string') ||
                     (isPlain && nodeType === '⚠') ||
                     nodeType === 'paragraph' ||
