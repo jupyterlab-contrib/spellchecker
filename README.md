@@ -13,6 +13,13 @@ A JupyterLab extension highlighting misspelled words in markdown cells within no
 The JupyterLab extension is based on [the spellchecker Jupyter Notebook extension](https://github.com/ipython-contrib/jupyter_contrib_nbextensions/tree/master/src/jupyter_contrib_nbextensions/nbextensions/spellchecker) and relies on [Typo.js](https://github.com/cfinke/Typo.js) for the actual spell checking.
 Spellchecker suggestions are available from the context menu. The style of the highlights can be customized in the _Advanced Settings Editor_.
 
+You can click on the status bar item to:
+
+- change language
+- enable spelling in the current document
+
+Spellchecking in comments and strings in code can be configured in settings.
+
 The extension provides (Hunspell) [SCOWL](http://wordlist.aspell.net/) dictionaries for:
 
 - American, British, Canadian, and Australian English
