@@ -1,3 +1,8 @@
+### 0.8.4 (2023-07-19)
+
+- bug fixes:
+  - require JupyterLab 4
+
 ### 0.8.3 (2023-06-05)
 
 - bug fixes:
