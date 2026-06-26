@@ -45,7 +45,24 @@
     },
     "theme": {
       "type": "string",
-      "enum": ["editor-native", "background-box", "wavy-underline", "dotted-underline"]
+      "oneOf": [
+        {
+          "const": "editor-native",
+          "title": "Editor Native"
+        },
+        {
+          "const": "background-box",
+          "title": "Background Box"
+        },
+        {
+          "const": "wavy-underline",
+          "title": "Wavy Underline"
+        },
+        {
+          "const": "dotted-underline",
+          "title": "Dotted Underline"
+        }
+      ]
     }
   },
   "properties": {
