@@ -45,15 +45,15 @@
     },
     "theme": {
       "type": "string",
-      "enum": ["background-box", "wavy-underline", "dotted-underline"]
+      "enum": ["editor-native", "background-box", "wavy-underline", "dotted-underline"]
     }
   },
   "properties": {
     "theme": {
       "title": "Theme",
-      "description": "Theme for decorating misspelt words, one of:\n  - 'background-box': fills the background of the misspelt word;\n  - 'wavy-underline': underline with wavelets (note: Chrome has a bug which prevents rendering of wavelets under some very short words)\n  - 'dotted-underline': underline with dotted style",
+      "description": "Theme for decorating misspelt words, one of:\n  - 'editor-native' wavy underline as implemented by the editor;\n - 'background-box': fills the background of the misspelt word;\n  - 'wavy-underline': underline with wavelets; compared to the default 'editor-native' it can be customized by tweaking underline styles but some browsers do not render the wavelets under very short words\n  - 'dotted-underline': underline with dotted style",
       "$ref": "#/definitions/theme",
-      "default": "background-box"
+      "default": "editor-native"
     },
     "language": {
       "title": "Language of the spellchecker",

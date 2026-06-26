@@ -9,6 +9,9 @@ body[data-jp-spellchecker-theme='wavy-underline'] .cm-lintRange-spell {
 
   /* For Chrome */
   text-decoration-skip-ink: none;
+
+  /* Disable CodeMirror-native style */
+  background: none;
 }
 
 body[data-jp-spellchecker-theme='dotted-underline'] .cm-lintRange-spell {
@@ -16,6 +19,9 @@ body[data-jp-spellchecker-theme='dotted-underline'] .cm-lintRange-spell {
 
   /* For Chrome */
   text-decoration-skip-ink: none;
+
+  /* Disable CodeMirror-native style */
+  background: none;
 }
 
 body[data-jp-spellchecker-theme='background-box'][data-jp-theme-light='false']
