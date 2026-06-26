@@ -353,7 +353,8 @@ class SpellChecker {
                 diagnostics.push({
                   from: match.index!,
                   to: match.index! + word.length,
-                  severity: 'spell' as any,
+                  severity: 'error',
+                  markClass: 'cm-lintRange-spell',
                   message: ''
                   // Using "actions" could provide nicer UX for replacing the
                   // misspelt word with one of suggestions; the challenge is
