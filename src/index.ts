@@ -287,6 +287,7 @@ class SpellChecker {
     this.editorExtensionRegistry.addExtension({
       name: 'spellchecker',
       factory: options => {
+        let previousMimeType = options.model.mimeType;
         const spellchecker = linter(
           (view: EditorView) => {
             const check = this._switchContentType(options.model.mimeType);
@@ -296,10 +297,17 @@ class SpellChecker {
             }
 
             const isPlain = options.model.mimeType === 'text/plain';
+            if (
+              isPlain &&
+              (options.model as { type?: string }).type === 'code'
+            ) {
+              return [];
+            }
+
             const checkComments =
-              this.settings?.composite?.checkComments || true;
+              this.settings?.composite?.checkComments !== false;
             const checkStrings =
-              this.settings?.composite?.checkStrings || false;
+              this.settings?.composite?.checkStrings === true;
             const diagnostics: Diagnostic[] = [];
 
             let tree = ensureSyntaxTree(view.state, view.state.doc.length);
@@ -370,6 +378,19 @@ class SpellChecker {
             // disable tooltips (default positioning is off)
             tooltipFilter: () => [],
             needsRefresh: update => {
+              const currentMimeType = options.model.mimeType;
+              if (currentMimeType !== previousMimeType) {
+                previousMimeType = currentMimeType;
+                return true;
+              }
+              if (
+                update.transactions.some(
+                  transaction => transaction.reconfigured
+                )
+              ) {
+                return true;
+              }
+
               const previous = update.startState.field(
                 this._invalidationCounter
               );
