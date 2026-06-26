@@ -70,21 +70,27 @@
     "watch:src": "tsc -w --sourceMap"
   },
   "dependencies": {
+    "@codemirror/language": "^6.0.0",
+    "@codemirror/lint": "^6.0.0",
+    "@codemirror/state": "^6.0.0",
+    "@codemirror/view": "^6.0.0",
     "@jupyterlab/application": "^4.0.2",
     "@jupyterlab/apputils": "^4.1.2",
     "@jupyterlab/cells": "^4.0.2",
     "@jupyterlab/codemirror": "^4.0.2",
     "@jupyterlab/fileeditor": "^4.0.2",
     "@jupyterlab/notebook": "^4.0.2",
+    "@jupyterlab/settingregistry": "^4.0.2",
     "@jupyterlab/statusbar": "^4.0.2",
+    "@jupyterlab/translation": "^4.0.2",
     "@jupyterlab/ui-components": "^4.0.2",
+    "@lezer/common": "^1.5.0",
     "@lumino/widgets": "^2.0.1",
     "@types/codemirror": "0.0.87",
     "typo-js": "^1.1.0"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^4.0.0",
-    "@jupyterlab/translation": "^4.0.2",
     "@lumino/coreutils": "^2.0.0",
     "@types/json-schema": "^7.0.11",
     "@types/react": "^18.0.26",
@@ -105,7 +111,7 @@
     "stylelint-config-recommended": "^8.0.0",
     "stylelint-config-standard": "^26.0.0",
     "stylelint-prettier": "^2.0.0",
-    "typescript": "~5.0.2",
+    "typescript": "~5.9.3",
     "yjs": "^13.5.40"
   },
   "jupyterlab": {
