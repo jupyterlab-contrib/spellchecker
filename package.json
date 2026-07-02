@@ -70,10 +70,6 @@
     "watch:src": "tsc -w --sourceMap"
   },
   "dependencies": {
-    "@codemirror/language": "^6.0.0",
-    "@codemirror/lint": "^6.0.0",
-    "@codemirror/state": "^6.0.0",
-    "@codemirror/view": "^6.0.0",
     "@jupyterlab/application": "^4.0.2",
     "@jupyterlab/apputils": "^4.1.2",
     "@jupyterlab/cells": "^4.0.2",
@@ -84,9 +80,7 @@
     "@jupyterlab/statusbar": "^4.0.2",
     "@jupyterlab/translation": "^4.0.2",
     "@jupyterlab/ui-components": "^4.0.2",
-    "@lezer/common": "^1.5.0",
     "@lumino/widgets": "^2.0.1",
-    "@types/codemirror": "0.0.87",
     "typo-js": "^1.1.0"
   },
   "devDependencies": {

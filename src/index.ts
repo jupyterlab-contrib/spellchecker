@@ -45,6 +45,18 @@ import {
 } from '@codemirror/state';
 import { IterMode } from '@lezer/common';
 
+/**
+ * `Diagnostic` extended with the fields we need to render the spellcheck
+ * mark across CodeMirror versions. Neither the custom `spell` severity nor
+ * `markClass` are present in the `@codemirror/lint` typings JupyterLab
+ * currently builds against, but both are honoured at runtime - see the note
+ * in the linter callback below.
+ */
+type SpellDiagnostic = Omit<Diagnostic, 'severity'> & {
+  severity: Diagnostic['severity'] | 'spell';
+  markClass?: string;
+};
+
 declare function require(name: string): any;
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const Typo = require('typo-js');
@@ -350,16 +362,27 @@ class SpellChecker {
                 !this.dictionary.check(word) &&
                 !this.ignored_tokens.has(word)
               ) {
-                diagnostics.push({
+                const diagnostic: SpellDiagnostic = {
                   from: match.index!,
                   to: match.index! + word.length,
-                  severity: 'spell' as any,
+                  // CodeMirror changed how a custom lint mark class is set:
+                  // - older versions (shipped with the JupyterLab we build
+                  //   against) derive the class straight from `severity`, so
+                  //   `severity: 'spell'` yields `cm-lintRange-spell`;
+                  // - newer versions restrict `severity` to a fixed set and
+                  //   collapse unknown values, exposing `markClass` instead.
+                  // Setting both keeps the `cm-lintRange-spell` class (which
+                  // our CSS styles) present whichever version JupyterLab
+                  // ships at runtime.
+                  severity: 'spell',
+                  markClass: 'cm-lintRange-spell',
                   message: ''
                   // Using "actions" could provide nicer UX for replacing the
                   // misspelt word with one of suggestions; the challenge is
                   // in making it only search for suggestions when tooltip
                   // gets open to avoid performance penalty.
-                });
+                };
+                diagnostics.push(diagnostic as Diagnostic);
               }
             }
 
